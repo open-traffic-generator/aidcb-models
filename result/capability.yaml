@@ -13,10 +13,14 @@ components:
       properties:
         unsupported:
           description: >-
-            A list of /components/schemas/... paths that are not supported.
+            A list of /components/schemas/... paths that are not supported by the current implementation.
           type: array
           items:
             type: string
+          x-status:
+            status: deprecated
+            information: |-
+              This property is deprecated in favor of profile.supported_properties
           x-field-uid: 1
         formats:
           description: >-
@@ -31,3 +35,33 @@ components:
           items:
             type: string
           x-field-uid: 2
+        profiles:
+          description: >-
+            A list of supported profiles, each of which supports a subset of the OTG model.
+            Each entry represents the path to a specific profile and its supported properties.
+          type: array
+          items:
+            $ref: '#/components/schemas/Profile.Capabilities'
+          x-field-uid: 3
+
+    Profile.Capabilities:
+      properties:
+        profile_type:
+          $ref: '../common/profile.yaml#/components/schemas/ProfileType'
+          x-field-uid: 1
+        otg:
+          type: object
+          properties:
+            supported_properties:
+              type: array
+              items:
+                type: string
+                x-field-uid: 2
+        ai_workloads:
+          type: object
+          properties:
+            supported_properties:
+              type: array
+              items:
+                type: string
+                x-field-uid: 3
