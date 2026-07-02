@@ -43,23 +43,28 @@ components:
           type: string
           x-field-uid: 2
           x-enum:
-            stopped:
+            reset:
               description: >-
-                Execution is stopped, or has not yet started.
+                Execution not yet started.
               x-field-uid: 1
             running:
               description: >-
                 Execution is in progress.
               x-field-uid: 2
-            stopping:
-              description: >-
-                Execution is in the process of stopping gracefully.
-              x-field-uid: 3
             aborting:
               description: >-
-                Execution is in the process of aborting immediately.
+                Execution is in the process of aborting.
+              x-field-uid: 3
+            success:
+              description: >-
+                Execution has completed successfully.
               x-field-uid: 4
+            error:
+              description: >-
+                Execution halted due to error
+              x-field-uid: 5
             aborted:
               description: >-
                 Execution has been aborted.
-              x-field-uid: 5
+              x-field-uid: 6
+            

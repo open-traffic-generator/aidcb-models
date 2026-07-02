@@ -151,24 +151,26 @@ components:
               description: >-
                 Deconfigure all hardware associated with this workload.
               x-field-uid: 1
+            configured:
+              description: >-
+                Configure all hardware associated with this workload.
+              x-field-uid: 2
         run_state:
           description: >-
             The requested run state for the AI workload. The runtime engine will
-            automatically transition through intermediate states to reach it.
+            automatically transition through intermediate states to reach the
+            requested state (as returned by get_state()).
           type: string
           x-field-uid: 2
           x-enum:
-            stopped:
-              description: >-
-                Stop execution gracefully. Not all applications support this.
-              x-field-uid: 1
             running:
               description: >-
                 Start execution of the AI workload. If the configuration has not
                 been applied yet, it will be applied automatically before
                 execution starts.
-              x-field-uid: 2
-            aborted:
+              x-field-uid: 1
+            aborting:
               description: >-
-                Stop execution immediately. Data may be lost. 
-              x-field-uid: 3
+                Stop execution as soon as possible. Data may be lost. If the
+                workload isn't running, this is a noop.
+              x-field-uid: 2
