@@ -77,6 +77,11 @@ components:
           items:
             $ref: '../egress/egressonlytracking.yaml#/components/schemas/EgressOnlyTracking'
           x-field-uid: 11
+        ai_workload:
+          description: |-
+            The AI Data Center Builder application configuration
+          $ref: ../aiworkload/aiworkload_config.yaml#/components/schemas/AiWorkload
+          x-field-uid: 101
     Config.Options:
       description: |-
         Global configuration options.

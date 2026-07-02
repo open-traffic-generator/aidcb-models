@@ -22,3 +22,86 @@ components:
       description: >-
         A empty container that is used to indicate a null choice.
       type: object
+
+    Described.Object:
+      description: >-
+        An object that can be described with a textual description.
+      type: object
+      properties:
+        description:
+          type: string
+          description: >-
+            A detailed description of the object.
+          x-field-uid: 1
+
+    Identified.Object:
+      description: >-
+        An object that has a unique identifier.
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: >-
+            The snowflake ID of the object. See https://blog.x.com/engineering/en_us/a/2010/announcing-snowflake
+          x-field-uid: 1
+
+    Paginated.Object:
+      description: >-
+        An object that supports pagination for list operations.
+      type: object
+      properties:
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 20
+          description: >-
+            Limit for list pagination.
+          x-field-uid: 1
+        offset:
+          type: integer
+          minimum: 0
+          default: 0
+          description: >-
+            Offset for list pagination.
+          x-field-uid: 2
+
+    Placeholder.Object:
+      description: >-
+        A placeholder object for fields that are yet to be properly defined.
+      type: object
+      properties:
+        value:
+          type: string
+          description: >-
+            Placeholder type for fields that are yet to be defined.
+          x-field-uid: 1
+
+    Tagged.Object:
+      description: >-
+        An object that can be associated with a list of tags.
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+          default: []
+          description: >-
+            List of tags associated with this object.
+          x-field-uid: 1
+
+    Versioned.Object:
+      description: >
+        An object that has a version.
+      type: object
+      properties:
+        version:
+          type: string
+          format: semantic-version
+          description: >-
+            Semver (semantic versioning) formatted version of containing object.
+          x-field-uid: 1
+

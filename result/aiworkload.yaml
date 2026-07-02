@@ -1,0 +1,65 @@
+components:
+  schemas:
+    AiWorkload.State.Request:
+      description: >-
+        The request to retrieve the config and run states of the configured AI
+        workload.
+      type: object
+
+    AiWorkload.State:
+      description: >-
+        The config and run states of the AI workload. An AI workload has
+        two independent states: the config state, which tracks the lifecycle of
+        the workload's configuration, and the run state, which tracks the
+        lifecycle of the workload's automated execution.
+      type: object
+      properties:
+        config_state:
+          description: |-
+            The current lifecycle state of the AI workload's configuration.
+
+            The config lifecycle is driven automatically by set_config; it is not
+            set directly via set_control_state (which may only request the
+            unconfigured config_state to deconfigure).
+          type: string
+          x-field-uid: 1
+          x-enum:
+            unconfigured:
+              description: >-
+                No configuration is applied to the workload.
+              x-field-uid: 1
+            configuring:
+              description: >-
+                The configuration is in the process of being applied.
+              x-field-uid: 2
+            configured:
+              description: >-
+                The configuration has been fully applied and the workload is
+                ready to run.
+              x-field-uid: 3
+        run_state:
+          description: >-
+            The current lifecycle state of the AI workload's execution.
+          type: string
+          x-field-uid: 2
+          x-enum:
+            stopped:
+              description: >-
+                Execution is stopped, or has not yet started.
+              x-field-uid: 1
+            running:
+              description: >-
+                Execution is in progress.
+              x-field-uid: 2
+            stopping:
+              description: >-
+                Execution is in the process of stopping gracefully.
+              x-field-uid: 3
+            aborting:
+              description: >-
+                Execution is in the process of aborting immediately.
+              x-field-uid: 4
+            aborted:
+              description: >-
+                Execution has been aborted.
+              x-field-uid: 5

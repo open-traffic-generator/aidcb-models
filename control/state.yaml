@@ -22,6 +22,8 @@ components:
               x-field-uid: 2
             traffic:
               x-field-uid: 3
+            ai_workload:
+              x-field-uid: 4
           x-field-uid: 1
         port:
           $ref: '#/components/schemas/State.Port'
@@ -32,6 +34,9 @@ components:
         traffic:
           $ref: '#/components/schemas/State.Traffic'
           x-field-uid: 4
+        ai_workload:
+          $ref: '#/components/schemas/State.AiWorkload'
+          x-field-uid: 6
     State.Port:
       description: >-
         States associated with configured ports.
@@ -118,3 +123,52 @@ components:
         rocev2:
           $ref: './protocol.yaml#/components/schemas/State.Protocol.Rocev2'
           x-field-uid: 9
+    State.AiWorkload:
+      description: >-
+        Run control for the AI workload. Set the desired state to request a
+        transition; the runtime engine automatically transitions through any
+        intermediate states to reach it. Configuring the hardware is started
+        automatically by set_config, resulting in a stopped run_state unless an
+        error is encountered, in which case the workload is left unconfigured.
+        A running run_state may be requested even while still configuring. Once
+        configured, the run_state usually only returns to stopped or aborted
+        (both of which imply the hardware is still configured), although an
+        unrecoverable hardware error may return it to the unconfigured
+        config_state.
+
+        Only one of config_state or run_state may be specified per call.
+      type: object
+      properties:
+        config_state:
+          description: >-
+            The requested config state for the AI workload. Only unconfigured may
+            be requested here (to deconfigure and release hardware); all other
+            config transitions are driven automatically by set_config.
+          type: string
+          x-field-uid: 1
+          x-enum:
+            unconfigured:
+              description: >-
+                Deconfigure all hardware associated with this workload.
+              x-field-uid: 1
+        run_state:
+          description: >-
+            The requested run state for the AI workload. The runtime engine will
+            automatically transition through intermediate states to reach it.
+          type: string
+          x-field-uid: 2
+          x-enum:
+            stopped:
+              description: >-
+                Stop execution gracefully. Not all applications support this.
+              x-field-uid: 1
+            running:
+              description: >-
+                Start execution of the AI workload. If the configuration has not
+                been applied yet, it will be applied automatically before
+                execution starts.
+              x-field-uid: 2
+            aborted:
+              description: >-
+                Stop execution immediately. Data may be lost. 
+              x-field-uid: 3
