@@ -7,6 +7,9 @@
     1. Most settings moved to devices/rocev2
     1. Some settings moved onto qp object (still under rocev2)
 
+- TCP settings
+    1. Replaced with OTG
+
 - Platforms:
     1. Old model issue: Cannot support multiple platforms of the same type (e.g. two custom platforms, for two different vendors)
         - Change platforms to be identified by name instead of type
@@ -20,4 +23,4 @@
 ## Name Changes
 
     Trial -> AiWorkload
-    
+

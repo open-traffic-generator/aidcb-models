@@ -2014,6 +2014,7 @@ components:
           description: >-
             Read-only info about the workload, e.g. server version.
           x-field-uid: 1
+        #------------- app_type and related property selections
         app_type:
           type: string
           default: collective_benchmark
@@ -2035,6 +2036,7 @@ components:
           description: >-
             Workload Emulation (WE) configuration. Active when app_type is workload_emulation.
           x-field-uid: 4
+        #------------- end of app_type property selections
         impairments:
           $ref: '#/components/schemas/Impairments'
           description: >-
