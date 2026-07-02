@@ -38,30 +38,64 @@ components:
         profiles:
           description: >-
             A list of supported profiles, each of which supports a subset of the OTG model.
-            Each entry represents the path to a specific profile and its supported properties.
           type: array
           items:
             $ref: '#/components/schemas/Profile.Capabilities'
           x-field-uid: 3
 
     Profile.Capabilities:
+      type: object
+      description: |-
+        Specifies the capabilities of a profile, which consists of recognized properties and/or enums,
+        and potentially property metadata overrides.
       properties:
-        profile_type:
-          $ref: '../common/profile.yaml#/components/schemas/ProfileType'
+        profile_name:
+          type: string
+          description: >-
+            The name of the profile.
           x-field-uid: 1
-        otg:
-          type: object
-          properties:
-            supported_properties:
-              type: array
-              items:
-                type: string
-                x-field-uid: 2
-        ai_workloads:
-          type: object
-          properties:
-            supported_properties:
-              type: array
-              items:
-                type: string
-                x-field-uid: 3
+        supported_properties:
+          type: array
+          description: |-
+            A list of supported properties and enums for the profile. All supported properties
+            and enums must be explicitly enumerated to prevent issues when other profiles add 
+            new properties.
+          items:
+            type: string
+            x-field-uid: 2
+        property_overrides:
+          type: array
+          description: 
+            A list of schema properties to override.
+          items:
+            $ref: '#/components/schemas/PropertyOverride'
+            x-field-uid: 3
+
+    PropertyOverride:
+      type: object
+      description: |-
+        Specifies an override for a schema property.
+      properties:
+        property_name:
+          type: string
+          description: >-
+            The path name of the property to override.
+          x-field-uid: 1
+        default_value:
+          type: string
+          description: >-
+            The new default value for the property. For numeric fields, the client must convert the string 
+            value here to the appropriate numeric type first.
+          x-field-uid: 2
+        min_value:
+          type: string
+          description: >-
+            The new minimum value for the property. For numeric fields, the client must convert the string 
+            value here to the appropriate numeric type first.
+          x-field-uid: 3
+        max_value:
+          type: string
+          description: >-
+            The new maximum value for the property. For numeric fields, the client must convert the string 
+            value here to the appropriate numeric type first.
+          x-field-uid: 4
