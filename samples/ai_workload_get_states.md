@@ -6,6 +6,12 @@ This documents the shape of the `/monitor/states` response when
 [`result/aiworkload.yaml`](../result/aiworkload.yaml), and generated into the
 `snappi` Python SDK as `AiWorkloadState`.
 
+The outer lifecycle discriminator is named `choice` (the standard
+openapiart convention for a oneOf-style field), wrapping a nested
+`AiWorkloadStateStopped` object. That nested object keeps the flat shape
+seen on other branches: a `reason` enum plus flat sibling fields
+`success_result`/`error_result` (no per-case sub-objects for `unrun`/`manual`).
+
 ## Structure diagram
 
 ```mermaid
@@ -16,9 +22,9 @@ classDiagram
     class AiWorkloadState {
         +str start_time
         +str stop_time
-        +TrialState trial_state
+        +TrialChoice choice
     }
-    class TrialState {
+    class TrialChoice {
         <<enumeration>>
         started
         stopped
@@ -55,7 +61,7 @@ classDiagram
     }
 
     StatesResponse *-- AiWorkloadState : ai_workload
-    AiWorkloadState --> TrialState : trial_state
+    AiWorkloadState --> TrialChoice : choice
     AiWorkloadState *-- AiWorkloadStateStarted : started
     AiWorkloadState *-- AiWorkloadStateStopping : stopping
     AiWorkloadState *-- AiWorkloadStateStopped : stopped
@@ -71,10 +77,10 @@ classDiagram
 |---|---|---|
 | `ai_workload.start_time` | `str` | ISO 8601 time the run started |
 | `ai_workload.stop_time` | `str` | ISO 8601 time the run ended |
-| `ai_workload.trial_state` | `"started" \| "stopped" \| "stopping"` | Discriminator; only the matching sub-object below is populated |
-| `ai_workload.started` | empty object | Present only while `trial_state == "started"` |
-| `ai_workload.stopping` | empty object | Present only while `trial_state == "stopping"` |
-| `ai_workload.stopped` | `AiWorkloadStateStopped` | Present only when `trial_state == "stopped"` |
+| `ai_workload.choice` | `"started" \| "stopped" \| "stopping"` | Discriminator; only the matching sub-object below is populated |
+| `ai_workload.started` | empty object | Present only while `choice == "started"` |
+| `ai_workload.stopping` | empty object | Present only while `choice == "stopping"` |
+| `ai_workload.stopped` | `AiWorkloadStateStopped` | Present only when `choice == "stopped"` |
 | `ai_workload.stopped.reason` | `"unrun" \| "success" \| "manual" \| "error"` | Why the run is stopped |
 | `ai_workload.stopped.success_result` | `Warning` (`.warnings: List[str]`) | Populated when `reason == "success"`; carries any non-fatal warnings |
 | `ai_workload.stopped.error_result` | `Error` (`.code: int`, `.kind: enum`, `.errors: List[str]`) | Populated when `reason == "error"` |
@@ -112,7 +118,7 @@ def run_ai_workload_trial(api, poll_interval_s=2.0):
 
     while True:
         ai_state = api.get_states(states_request).ai_workload
-        if ai_state.trial_state != ai_state.STOPPED:
+        if ai_state.choice != ai_state.STOPPED:
             time.sleep(poll_interval_s)
             continue
 
