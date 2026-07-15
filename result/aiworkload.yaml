@@ -58,10 +58,10 @@ components:
       type: object
       properties:
         success_result:
-          $ref: './request.yaml#/components/responses/Success'
+          $ref: './request.yaml#/components/schemas/Warning'
           x-field-uid: 3
         error_result:
-          $ref: './request.yaml#/components/responses/Failure'
+          $ref: './request.yaml#/components/schemas/Error'
           x-field-uid: 5
         reason:
           type: string
