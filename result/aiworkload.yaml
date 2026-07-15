@@ -21,7 +21,7 @@ components:
           x-field-uid: 1
         stop_time:
           description: >-
-            The ISO 8601 formatted time the run was stopped
+            The ISO 8601 formatted time the run ended
           type: string
           x-field-uid: 2
         trial_state:
@@ -32,7 +32,7 @@ components:
           x-enum:
             stopped:
               description: >-
-                Execution has been stopped.
+                The trial has been stopped.
               x-field-uid: 1
             started:
               description: >-
@@ -40,7 +40,7 @@ components:
               x-field-uid: 2
             stopping:
               description: >-
-                Execution is in the process of stopping.
+                The trial is in the process of stopping.
               x-field-uid: 3
         stopped:
           $ref: '#/components/schemas/AiWorkload.State.Stopped'
@@ -57,13 +57,7 @@ components:
         Status information about why state has stopped
       type: object
       properties:
-        success_result:
-          $ref: './request.yaml#/components/responses/Success'
-          x-field-uid: 3
-        error_result:
-          $ref: './request.yaml#/components/responses/Failure'
-          x-field-uid: 5
-        reason:
+        status:
           type: string
           x-field-uid: 1
           x-enum:
@@ -79,18 +73,38 @@ components:
               description: >-
                 The last trial execution was stopped manually
               x-field-uid: 3
-            error:
+            failure:
               description: >-
                 The last trial execution failed with an error
               x-field-uid: 4
+        unrun:
+          $ref: '#/components/schemas/Ai.Workload.State.Stopped.Unrun'
+          x-field-uid: 2
+        success:
+          $ref: './request.yaml#/components/schemas/Warning'
+          x-field-uid: 3
+        manual:
+          $ref: '#/components/schemas/Ai.Workload.State.Stopped.Manual'
+          x-field-uid: 4
+        failure:
+          $ref: './request.yaml#/components/schemas/Error'
+          x-field-uid: 5
+
+    Ai.Workload.State.Stopped.Unrun:
+      description: >-
+        (Empty) Status associated with a new, never run configuration
+
+    Ai.Workload.State.Stopped.Manual:
+      description: >-
+        (Empty) Status associated with a run that was manually stopped
 
     AiWorkload.State.Started:
       description: >-
-        (Empty) Status information about the started state
+        (empty) Status associated with a run in progress
 
     AiWorkload.State.Stopping:
       description: >-
-        (Empty) Status information about the stopping state
-
+        (empty) Status information associated with a run in the process of stopping
+      type: object
     
 
