@@ -24,7 +24,7 @@ components:
             The ISO 8601 formatted time the run ended
           type: string
           x-field-uid: 2
-        trial_state:
+        choice:
           description: |-
             The current lifecycle state of the AI workload's trial run.
           type: string
@@ -57,7 +57,7 @@ components:
         Status information about why state has stopped
       type: object
       properties:
-        status:
+        choice:
           type: string
           x-field-uid: 1
           x-enum:

@@ -6,6 +6,11 @@ This documents the shape of the `/monitor/states` response when
 [`result/aiworkload.yaml`](../result/aiworkload.yaml), and generated into the
 `snappi` Python SDK as `AiWorkloadState`.
 
+This branch's discriminators are both named `choice` (the standard
+openapiart convention for a oneOf-style field), rather than the
+`trial_state`/`status` names used previously — the nested shape itself
+(`stopped` wrapping `unrun`/`success`/`manual`/`failure`) is unchanged.
+
 ## Structure diagram
 
 ```mermaid
@@ -16,9 +21,9 @@ classDiagram
     class AiWorkloadState {
         +str start_time
         +str stop_time
-        +TrialState trial_state
+        +TrialChoice choice
     }
-    class TrialState {
+    class TrialChoice {
         <<enumeration>>
         started
         stopped
@@ -31,9 +36,9 @@ classDiagram
         <<empty>>
     }
     class AiWorkloadStateStopped {
-        +Status status
+        +StoppedChoice choice
     }
-    class Status {
+    class StoppedChoice {
         <<enumeration>>
         unrun
         success
@@ -61,11 +66,11 @@ classDiagram
     }
 
     StatesResponse *-- AiWorkloadState : ai_workload
-    AiWorkloadState --> TrialState : trial_state
+    AiWorkloadState --> TrialChoice : choice
     AiWorkloadState *-- AiWorkloadStateStarted : started
     AiWorkloadState *-- AiWorkloadStateStopping : stopping
     AiWorkloadState *-- AiWorkloadStateStopped : stopped
-    AiWorkloadStateStopped --> Status : status
+    AiWorkloadStateStopped --> StoppedChoice : choice
     AiWorkloadStateStopped *-- AiWorkloadStateStoppedUnrun : unrun
     AiWorkloadStateStopped *-- Warning : success
     AiWorkloadStateStopped *-- AiWorkloadStateStoppedManual : manual
@@ -79,11 +84,11 @@ classDiagram
 |---|---|---|
 | `ai_workload.start_time` | `str` | ISO 8601 time the run started |
 | `ai_workload.stop_time` | `str` | ISO 8601 time the run ended |
-| `ai_workload.trial_state` | `"started" \| "stopped" \| "stopping"` | Discriminator; only the matching sub-object below is populated |
-| `ai_workload.started` | empty object | Present only while `trial_state == "started"` |
-| `ai_workload.stopping` | empty object | Present only while `trial_state == "stopping"` |
-| `ai_workload.stopped` | `AiWorkloadStateStopped` | Present only when `trial_state == "stopped"` |
-| `ai_workload.stopped.status` | `"unrun" \| "success" \| "manual" \| "failure"` | Discriminator for why the run is stopped |
+| `ai_workload.choice` | `"started" \| "stopped" \| "stopping"` | Discriminator; only the matching sub-object below is populated |
+| `ai_workload.started` | empty object | Present only while `choice == "started"` |
+| `ai_workload.stopping` | empty object | Present only while `choice == "stopping"` |
+| `ai_workload.stopped` | `AiWorkloadStateStopped` | Present only when `choice == "stopped"` |
+| `ai_workload.stopped.choice` | `"unrun" \| "success" \| "manual" \| "failure"` | Discriminator for why the run is stopped |
 | `ai_workload.stopped.unrun` | empty object | Configuration has never been run |
 | `ai_workload.stopped.success` | `Warning` (`.warnings: List[str]`) | Run completed successfully; may still carry non-fatal warnings |
 | `ai_workload.stopped.manual` | empty object | Run was stopped manually (e.g. `state=stop`) |
@@ -119,25 +124,25 @@ def run_ai_workload_trial(api, poll_interval_s=2.0):
 
     while True:
         ai_state = api.get_states(states_request).ai_workload
-        if ai_state.trial_state != ai_state.STOPPED:
+        if ai_state.choice != ai_state.STOPPED:
             time.sleep(poll_interval_s)
             continue
 
         stopped = ai_state.stopped
-        if stopped.status == stopped.SUCCESS:
+        if stopped.choice == stopped.SUCCESS:
             warnings = stopped.success.warnings or []
             print("Trial succeeded with {} warning(s):".format(len(warnings)))
             for warning in warnings:
                 print("  - {}".format(warning))
-        elif stopped.status == stopped.FAILURE:
+        elif stopped.choice == stopped.FAILURE:
             error = stopped.failure
             print("Trial failed (code={}, kind={}):".format(error.code, error.kind))
             for message in error.errors:
                 print("  - {}".format(message))
-        elif stopped.status == stopped.MANUAL:
+        elif stopped.choice == stopped.MANUAL:
             print("Trial was stopped manually.")
         else:
-            print("Trial stopped with unexpected status: {}".format(stopped.status))
+            print("Trial stopped with unexpected reason: {}".format(stopped.choice))
         break
 
 
