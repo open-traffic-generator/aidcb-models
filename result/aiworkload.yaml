@@ -24,15 +24,21 @@ components:
             The ISO 8601 formatted time the run ended
           type: string
           x-field-uid: 2
+        success_status:
+          $ref: './request.yaml#/components/schemas/Warning'
+          x-field-uid: 3
+        failure_status:
+          $ref: './request.yaml#/components/schemas/Error'
+          x-field-uid: 5
         trial_state:
           description: |-
             The current lifecycle state of the AI workload's trial run.
           type: string
-          x-field-uid: 3
+          x-field-uid: 4
           x-enum:
-            stopped:
+            unrun:
               description: >-
-                The trial has been stopped.
+                The current trial configuration has never been run
               x-field-uid: 1
             started:
               description: >-
@@ -42,69 +48,18 @@ components:
               description: >-
                 The trial is in the process of stopping.
               x-field-uid: 3
-        stopped:
-          $ref: '#/components/schemas/AiWorkload.State.Stopped'
-          x-field-uid: 4
-        started:
-          $ref: '#/components/schemas/AiWorkload.State.Started'
-          x-field-uid: 5
-        stopping:
-          $ref: '#/components/schemas/AiWorkload.State.Stopping'
-          x-field-uid: 6
-
-    AiWorkload.State.Stopped:
-      description: >-
-        Status information about why state has stopped
-      type: object
-      properties:
-        status:
-          type: string
-          x-field-uid: 1
-          x-enum:
-            unrun:
+            stopped:
               description: >-
-                The last specified configuration has never been run
-              x-field-uid: 1
+                The trial has been manually stopped.
+              x-field-uid: 4
             success:
               description: >-
-                The last trial execution has been successfully completed
-              x-field-uid: 2
-            manual:
-              description: >-
-                The last trial execution was stopped manually
-              x-field-uid: 3
+                The trial finished successfully
+              x-field-uid: 5
             failure:
               description: >-
-                The last trial execution failed with an error
-              x-field-uid: 4
-        unrun:
-          $ref: '#/components/schemas/Ai.Workload.State.Stopped.Unrun'
-          x-field-uid: 2
-        success:
-          $ref: './request.yaml#/components/schemas/Warning'
-          x-field-uid: 3
-        manual:
-          $ref: '#/components/schemas/Ai.Workload.State.Stopped.Manual'
-          x-field-uid: 4
-        failure:
-          $ref: './request.yaml#/components/schemas/Error'
-          x-field-uid: 5
+                The trial failed with an error
+              x-field-uid: 6
 
-    Ai.Workload.State.Stopped.Unrun:
-      description: >-
-        (Empty) Status associated with a new, never run configuration
-
-    Ai.Workload.State.Stopped.Manual:
-      description: >-
-        (Empty) Status associated with a run that was manually stopped
-
-    AiWorkload.State.Started:
-      description: >-
-        (empty) Status associated with a run in progress
-
-    AiWorkload.State.Stopping:
-      description: >-
-        (empty) Status information associated with a run in the process of stopping
-      type: object
     
 

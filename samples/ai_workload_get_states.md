@@ -6,6 +6,11 @@ This documents the shape of the `/monitor/states` response when
 [`result/aiworkload.yaml`](../result/aiworkload.yaml), and generated into the
 `snappi` Python SDK as `AiWorkloadState`.
 
+This branch uses a flat status design: `trial_state` is a single
+discriminator covering every lifecycle state (including terminal
+success/failure), with `success_status`/`failure_status` as flat sibling
+fields rather than nested per-outcome sub-objects.
+
 ## Structure diagram
 
 ```mermaid
@@ -20,31 +25,12 @@ classDiagram
     }
     class TrialState {
         <<enumeration>>
-        started
-        stopped
-        stopping
-    }
-    class AiWorkloadStateStarted {
-        <<empty>>
-    }
-    class AiWorkloadStateStopping {
-        <<empty>>
-    }
-    class AiWorkloadStateStopped {
-        +Status status
-    }
-    class Status {
-        <<enumeration>>
         unrun
+        started
+        stopping
+        stopped
         success
-        manual
         failure
-    }
-    class AiWorkloadStateStoppedUnrun {
-        <<empty>>
-    }
-    class AiWorkloadStateStoppedManual {
-        <<empty>>
     }
     class Warning {
         +List~str~ warnings
@@ -62,14 +48,8 @@ classDiagram
 
     StatesResponse *-- AiWorkloadState : ai_workload
     AiWorkloadState --> TrialState : trial_state
-    AiWorkloadState *-- AiWorkloadStateStarted : started
-    AiWorkloadState *-- AiWorkloadStateStopping : stopping
-    AiWorkloadState *-- AiWorkloadStateStopped : stopped
-    AiWorkloadStateStopped --> Status : status
-    AiWorkloadStateStopped *-- AiWorkloadStateStoppedUnrun : unrun
-    AiWorkloadStateStopped *-- Warning : success
-    AiWorkloadStateStopped *-- AiWorkloadStateStoppedManual : manual
-    AiWorkloadStateStopped *-- Error : failure
+    AiWorkloadState *-- Warning : success_status
+    AiWorkloadState *-- Error : failure_status
     Error --> Kind : kind
 ```
 
@@ -79,27 +59,23 @@ classDiagram
 |---|---|---|
 | `ai_workload.start_time` | `str` | ISO 8601 time the run started |
 | `ai_workload.stop_time` | `str` | ISO 8601 time the run ended |
-| `ai_workload.trial_state` | `"started" \| "stopped" \| "stopping"` | Discriminator; only the matching sub-object below is populated |
-| `ai_workload.started` | empty object | Present only while `trial_state == "started"` |
-| `ai_workload.stopping` | empty object | Present only while `trial_state == "stopping"` |
-| `ai_workload.stopped` | `AiWorkloadStateStopped` | Present only when `trial_state == "stopped"` |
-| `ai_workload.stopped.status` | `"unrun" \| "success" \| "manual" \| "failure"` | Discriminator for why the run is stopped |
-| `ai_workload.stopped.unrun` | empty object | Configuration has never been run |
-| `ai_workload.stopped.success` | `Warning` (`.warnings: List[str]`) | Run completed successfully; may still carry non-fatal warnings |
-| `ai_workload.stopped.manual` | empty object | Run was stopped manually (e.g. `state=stop`) |
-| `ai_workload.stopped.failure` | `Error` (`.code: int`, `.kind: enum`, `.errors: List[str]`) | Run failed |
+| `ai_workload.trial_state` | `"unrun" \| "started" \| "stopping" \| "stopped" \| "success" \| "failure"` | Single discriminator covering the whole lifecycle, including both terminal outcomes |
+| `ai_workload.success_status` | `Warning` (`.warnings: List[str]`) | Populated when `trial_state == "success"`; carries any non-fatal warnings |
+| `ai_workload.failure_status` | `Error` (`.code: int`, `.kind: enum`, `.errors: List[str]`) | Populated when `trial_state == "failure"` |
 
-> **Note:** `stopped.success` and `stopped.failure` resolve to the shared
-> `Warning`/`Error` schemas (also used elsewhere in the API for generic
-> success/failure payloads), not empty marker objects — this is what lets a
-> client read actual warning/error text off a completed run.
+> **Note:** unlike the nested/discriminated-union designs on other branches,
+> there is no intermediate `stopped` wrapper — `trial_state` itself carries
+> the terminal outcome (`success`/`failure`) alongside the transient states
+> (`unrun`/`started`/`stopping`/`stopped`). `success_status`/`failure_status`
+> resolve to the shared `Warning`/`Error` schemas, so a client can read
+> actual warning/error text directly once `trial_state` settles.
 
 ## Sample script
 
-Starts the AI workload trial run and blocks until it stops, then reports
-warnings on success, errors on failure, or a manual-stop notice. Assumes
-`api` is an already-connected `snappi` client with the AI workload
-configuration already pushed via `api.set_config(...)`.
+Starts the AI workload trial run and blocks until it reaches a terminal
+state, then reports warnings on success, errors on failure, or a
+manual-stop notice. Assumes `api` is an already-connected `snappi` client
+with the AI workload configuration already pushed via `api.set_config(...)`.
 
 ```python
 import time
@@ -119,25 +95,25 @@ def run_ai_workload_trial(api, poll_interval_s=2.0):
 
     while True:
         ai_state = api.get_states(states_request).ai_workload
-        if ai_state.trial_state != ai_state.STOPPED:
+        trial_state = ai_state.trial_state
+        if trial_state in (ai_state.UNRUN, ai_state.STARTED, ai_state.STOPPING):
             time.sleep(poll_interval_s)
             continue
 
-        stopped = ai_state.stopped
-        if stopped.status == stopped.SUCCESS:
-            warnings = stopped.success.warnings or []
+        if trial_state == ai_state.SUCCESS:
+            warnings = ai_state.success_status.warnings or []
             print("Trial succeeded with {} warning(s):".format(len(warnings)))
             for warning in warnings:
                 print("  - {}".format(warning))
-        elif stopped.status == stopped.FAILURE:
-            error = stopped.failure
+        elif trial_state == ai_state.FAILURE:
+            error = ai_state.failure_status
             print("Trial failed (code={}, kind={}):".format(error.code, error.kind))
             for message in error.errors:
                 print("  - {}".format(message))
-        elif stopped.status == stopped.MANUAL:
+        elif trial_state == ai_state.STOPPED:
             print("Trial was stopped manually.")
         else:
-            print("Trial stopped with unexpected status: {}".format(stopped.status))
+            print("Trial stopped with unexpected trial_state: {}".format(trial_state))
         break
 
 
