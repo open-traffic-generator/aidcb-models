@@ -127,50 +127,21 @@ components:
       description: >-
         Run control for the AI workload. Set the desired state to request a
         transition; the runtime engine automatically transitions through any
-        intermediate states to reach it. Configuring the hardware is started
-        automatically by set_config, resulting in a stopped run_state unless an
-        error is encountered, in which case the workload is left unconfigured.
-        A running run_state may be requested even while still configuring. Once
-        configured, the run_state usually only returns to stopped or aborted
-        (both of which imply the hardware is still configured), although an
-        unrecoverable hardware error may return it to the unconfigured
-        config_state.
+        intermediate states to reach it. 
 
         Only one of config_state or run_state may be specified per call.
+      description: >-
+        States associated with the defined AI Workload config
       type: object
       properties:
-        config_state:
-          description: >-
-            The requested config state for the AI workload. Only unconfigured may
-            be requested here (to deconfigure and release hardware); all other
-            config transitions are driven automatically by set_config.
+        choice:
           type: string
+          default: ai_workload_trial
+          x-enum:
+            ai_workload_trial:
+              x-field-uid: 1
           x-field-uid: 1
-          x-enum:
-            unconfigured:
-              description: >-
-                Deconfigure all hardware associated with this workload.
-              x-field-uid: 1
-            configured:
-              description: >-
-                Configure all hardware associated with this workload.
-              x-field-uid: 2
-        run_state:
-          description: >-
-            The requested run state for the AI workload. The runtime engine will
-            automatically transition through intermediate states to reach the
-            requested state (as returned by get_state()).
-          type: string
+        ai_workload_trial:
+          $ref: './aiworkload.yaml#/components/schemas/State.AiWorkload.Trial'
           x-field-uid: 2
-          x-enum:
-            running:
-              description: >-
-                Start execution of the AI workload. If the configuration has not
-                been applied yet, it will be applied automatically before
-                execution starts.
-              x-field-uid: 1
-            aborting:
-              description: >-
-                Stop execution as soon as possible. Data may be lost. If the
-                workload isn't running, this is a noop.
-              x-field-uid: 2
+

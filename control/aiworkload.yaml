@@ -1,0 +1,31 @@
+openapi: 3.0.3
+info:
+  title: Control AI Workload Trial models
+  description: >-
+    All control AI Workload Trial schemas
+  version: ^0.0.0
+components:
+  schemas:
+    State.AiWorkload.Trial:
+      description: >-
+        Provides state control of AI Workload Trials
+      type: object
+      required:
+        - state
+      properties:
+        state:
+          description: |-
+            The requested trial state.
+
+            If the value of the state property is 'start' then the trial will be run, if possible.
+
+            If the value of the state property is 'stop' then the trial will be stopped before automatically
+            completing. Normally the trial will automatically stop when all the requested combinations have
+            been executed, so this is not normally needed.
+          type: string
+          x-field-uid: 1
+          x-enum:
+            start:
+              x-field-uid: 1
+            stop:
+              x-field-uid: 2

@@ -14,57 +14,83 @@ components:
         lifecycle of the workload's automated execution.
       type: object
       properties:
-        config_state:
+        start_time:
+          description: >-
+            The ISO 8601 formatted time the run was started
+          type: string
+          x-field-uid: 1
+        stop_time:
+          description: >-
+            The ISO 8601 formatted time the run was stopped
+          type: string
+          x-field-uid: 2
+        trial_state:
           description: |-
-            The current lifecycle state of the AI workload's configuration.
+            The current lifecycle state of the AI workload's trial run.
+          type: string
+          x-field-uid: 3
+          x-enum:
+            stopped:
+              description: >-
+                Execution has been stopped.
+              x-field-uid: 1
+            started:
+              description: >-
+                The trial is running.
+              x-field-uid: 2
+            stopping:
+              description: >-
+                Execution is in the process of stopping.
+              x-field-uid: 3
+        stopped:
+          $ref: '#/components/schemas/AiWorkload.State.Stopped'
+          x-field-uid: 4
+        started:
+          $ref: '#/components/schemas/AiWorkload.State.Started'
+          x-field-uid: 5
+        stopping:
+          $ref: '#/components/schemas/AiWorkload.State.Stopping'
+          x-field-uid: 6
 
-            The config lifecycle is driven automatically by set_config; it is not
-            set directly via set_control_state (which may only request the
-            unconfigured config_state to deconfigure).
+    AiWorkload.State.Stopped:
+      description: >-
+        Status information about why state has stopped
+      type: object
+      properties:
+        success_result:
+          $ref: './request.yaml#/components/responses/Success'
+          x-field-uid: 3
+        error_result:
+          $ref: './request.yaml#/components/responses/Failure'
+          x-field-uid: 5
+        reason:
           type: string
           x-field-uid: 1
           x-enum:
-            unconfigured:
+            unrun:
               description: >-
-                No configuration is applied to the workload.
+                The last specified configuration has never been run
               x-field-uid: 1
-            configuring:
-              description: >-
-                The configuration is in the process of being applied.
-              x-field-uid: 2
-            configured:
-              description: >-
-                The configuration has been fully applied and the workload is
-                ready to run.
-              x-field-uid: 3
-        run_state:
-          description: >-
-            The current lifecycle state of the AI workload's execution.
-          type: string
-          x-field-uid: 2
-          x-enum:
-            reset:
-              description: >-
-                Execution not yet started.
-              x-field-uid: 1
-            running:
-              description: >-
-                Execution is in progress.
-              x-field-uid: 2
-            aborting:
-              description: >-
-                Execution is in the process of aborting.
-              x-field-uid: 3
             success:
               description: >-
-                Execution has completed successfully.
-              x-field-uid: 4
+                The last trial execution has been successfully completed
+              x-field-uid: 2
+            manual:
+              description: >-
+                The last trial execution was stopped manually
+              x-field-uid: 3
             error:
               description: >-
-                Execution halted due to error
-              x-field-uid: 5
-            aborted:
-              description: >-
-                Execution has been aborted.
-              x-field-uid: 6
-            
+                The last trial execution failed with an error
+              x-field-uid: 4
+
+    AiWorkload.State.Started:
+      description: >-
+        (Empty) Status information about the started state
+
+    AiWorkload.State.Stopping:
+      description: >-
+        (Empty) Status information about the stopping state
+
+    
+
