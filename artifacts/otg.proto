@@ -62,6 +62,9 @@ message Config {
   // received for each unique value in the bits being tracked from the beginning of the
   // test.
   repeated EgressOnlyTracking egress_only_tracking = 11;
+
+  // The AI Data Center Builder application configuration
+  AiWorkload ai_workload = 101;
 }
 
 // Global configuration options.
@@ -2195,86 +2198,36 @@ message LagPortMacsecSecureEntityCryptoEngineEncryptDecryptHardwareAcceleration 
   optional Choice.Enum choice = 1;
 }
 
-// A container for layer1 settings.
+// Layer 1 physical configuration for a test port.
 message Layer1 {
 
-  // A list of unique names of port objects that will share the
-  // choice settings.
-  // 
-  // x-constraint:
-  // - /components/schemas/Port/properties/name
-  // 
-  repeated string port_names = 1;
-
-  message Speed {
+  message SpeedMode {
     enum Enum {
       unspecified = 0;
-      speed_10_fd_mbps = 1;
-      speed_10_hd_mbps = 2;
-      speed_100_fd_mbps = 3;
-      speed_100_hd_mbps = 4;
-      speed_1_gbps = 5;
-      speed_10_gbps = 6;
-      speed_25_gbps = 7;
-      speed_40_gbps = 8;
-      speed_50_gbps = 9;
-      speed_100_gbps = 10;
-      speed_200_gbps = 11;
-      speed_400_gbps = 12;
-      speed_800_gbps = 13;
+      speed_800ge_pam4_106g_kp4_fec = 1;
+      speed_400ge_pam4_106g_kp4_fec = 2;
+      speed_400ge_pam4_53g_kp4_fec = 3;
+      speed_200ge_pam4_106g_kp4_fec = 4;
+      speed_200ge_pam4_53g_kp4_fec = 5;
+      speed_100ge_pam4_106g_kp4_fec = 6;
+      speed_100ge_pam4_106g_rs_fec = 7;
+      speed_100ge_pam4_53g_kp4_fec = 8;
+      speed_100ge_nrz_rs_fec = 9;
+      speed_100ge_nrz_no_fec = 10;
     }
   }
-  // Set the speed if supported. When no speed is explicitly set, the current
-  // speed of underlying test interface shall be assumed.
-  optional Speed.Enum speed = 2;
+  // Speed, modulation, and FEC mode for the physical link. Default is speed_400ge_pam4_106g_kp4_fec.
+  optional SpeedMode.Enum speed_mode = 1;
 
-  message Media {
-    enum Enum {
-      unspecified = 0;
-      copper = 1;
-      fiber = 2;
-      sgmii = 3;
-    }
-  }
-  // Set the type of media for test interface if supported. When no media
-  // type is explicitly set, the current media type of underlying test
-  // interface shall be assumed.
-  optional Media.Enum media = 3;
+  // Enable or disable auto negotiation. Default false.
+  optional bool auto_negotiate = 2;
 
-  // Enable promiscuous mode on test interface. A warning shall be raised if
-  // this field is set to `true`, even when it's not supported, ignoring
-  // the setting altogether.
-  // default = True
-  optional bool promiscuous = 4;
+  // Enable or disable link training. Default false.
+  optional bool link_training = 3;
 
-  // Set the maximum transmission unit size. A warning shall be raised if
-  // the specified value is valid but not supported, ignoring the setting altogether.
-  // default = 1500
-  optional uint32 mtu = 5;
-
-  // Under Review: This field is currently under review for pending exploration on use
-  // cases
-  // 
-  // Set to true to override the auto_negotiate, link_training
-  // and rs_fec settings for gigabit ethernet interfaces.
-  optional bool ieee_media_defaults = 6;
-
-  // Under Review: This field is currently under review for pending exploration on use
-  // cases, given that a separate configuration called `AutoNegotiation` already exists.
-  // 
-  // Enable/disable auto negotiation.
-  optional bool auto_negotiate = 7;
-
-  // Description missing in models
-  Layer1AutoNegotiation auto_negotiation = 8;
-
-  // Description missing in models
-  Layer1FlowControl flow_control = 9;
-
-  // Globally unique name of an object. It also serves as the primary key for arrays of
-  // objects.
-  // required = true
-  optional string name = 10;
+  // Enable or disable IEEE defaults. Takes precedence over auto_negotiate and link_training.
+  // Default false.
+  optional bool ieee_defaults = 4;
 }
 
 // Configuration for auto negotiation settings
@@ -14551,6 +14504,1325 @@ message EgressOnlyTrackingFilter {
   optional Choice.Enum choice = 1;
 }
 
+// Information about a file.
+message FileInfo {
+
+  // The path of the file.
+  optional string path = 1;
+
+  // The size of the file in bytes.
+  optional int32 size = 2;
+}
+
+// Describes test resources, how they are configured, and how they are attached to the
+// topology.
+message TrialBindings {
+
+  // Custom binding that maps ranks to NPUs, configures NIC settings, and assigns physical
+  // test resources.
+  CustomBinding custom_binding = 1;
+
+  // A copy of the infrastructure profile used when the binding was created. Allows trials
+  // to be re-run with the original profile version.
+  InfrastructureProfile infrastructure_profile = 2;
+
+  // Low-level Chakra infrastructure derived from the infrastructure_profile. JSON-encoded
+  // opaque value — see keysight_chakra.infra.Infrastructure.
+  optional string infrastructure = 3;
+
+  // Annotations for the low-level Chakra infrastructure. JSON-encoded opaque values —
+  // see keysight_chakra.infra.Annotation.
+  repeated string infrastructure_annotations = 4;
+
+  // Assigns platforms to different regions of the infrastructure.
+  repeated PlatformRegion platform_regions = 5;
+
+  // Specifications for creating named process groups. Each spec defines a prefix, count,
+  // optional size, and allocation strategy.
+  repeated GroupSpec group_specs = 6;
+}
+
+// General information about the Trial Result
+message ResultInfo {
+
+  // The list of tags associated with the trial.
+  // List of tags associated with this object.
+  // default = []
+  repeated string tags = 3;
+
+  // A detailed description of the trial.
+  // A detailed description of the object.
+  optional string description = 4;
+}
+
+// General information about the Trial Result
+message CcbResult {
+
+  // The ID of the trial.
+  // The snowflake ID of the object. See https://blog.x.com/engineering/en_us/a/2010/announcing-snowflake
+  // required = true
+  optional int64 id = 1;
+
+  // General information about the Trial Result.
+  ResultInfo info = 2;
+
+  // The list of tags associated with the trial.
+  // List of tags associated with this object.
+  // default = []
+  repeated string tags = 3;
+
+  // A detailed description of the trial.
+  // A detailed description of the object.
+  optional string description = 4;
+}
+
+// CCB (Collective Communication Benchmark) configuration.
+message CcbConfig {
+
+  // The benchmark configuration defining the collective communication test.
+  CcbBenchmark benchmark = 1;
+}
+
+// Workload Emulation (WE) configuration for a trial run. PLACEHOLDER: WE configuration
+// schema is not yet defined.
+message WorkloadEmulationConfig {
+
+  // Placeholder property — WE configuration is not yet modelled. This field has no effect
+  // and will be removed in a future version.
+  optional string placeholder = 1;
+}
+
+// Platform configuration for a trial run. Specifies per-platform typed settings.
+message PlatformConfig {
+
+  // The name of this platform
+  optional string name = 1;
+
+  message Choice {
+    enum Enum {
+      unspecified = 0;
+      keysight_nccl_test = 1;
+      keysight_sw = 2;
+      keysight_hw = 3;
+      custom = 4;
+      keysight_scp_sim = 5;
+    }
+  }
+  // The platform type to use for this trial run. unspecified: platform is not set; the
+  // server applies its default. keysight_nccl_test: Keysight NCCL test platform. keysight_sw:
+  // Keysight software simulation platform. keysight_hw: Keysight hardware platform (default
+  // for most trials). custom: custom or third-party platform; use PhysicalBindingConfig.custom_settings
+  // for binding parameters. keysight_scp_sim: Keysight SCP simulation platform.
+  optional Choice.Enum choice = 2;
+
+  // Generic key/value platform settings. May be used by all platforms for testing purposes.
+  // For platform=custom, this is the primary platform configuration — pass all vendor-specific
+  // parameters here.
+  StringMap custom_settings = 3;
+
+  // Configuration specific to the Keysight NCCL test platform.
+  KeysightNcclTestConfig keysight_nccl_test = 4;
+
+  // Configuration specific to the Keysight software agent platform.
+  KeysightSwConfig keysight_sw = 5;
+
+  // Configuration specific to the Keysight hardware platform.
+  KeysightHwConfig keysight_hw = 6;
+
+  // Configuration for a custom or third-party platform. Use PhysicalBindingConfig.custom_settings
+  // for per-binding parameters.
+  CustomPlatformConfig custom = 7;
+
+  // Configuration specific to the Keysight SCP simulation platform.
+  KeysightScpSimConfig keysight_scp_sim = 8;
+}
+
+// Configuration for the Keysight NCCL test platform.
+message KeysightNcclTestConfig {
+
+  // NCCL environment variable overrides as name/value pairs.
+  StringMap nccl_env_vars = 1;
+}
+
+// Strongly-typed configuration for the Keysight software agent platform. Placeholder
+// — parameters will be added as requirements are identified.
+message KeysightSwConfig {
+}
+
+// Strongly-typed configuration for the Keysight hardware platform. Placeholder — parameters
+// will be added as requirements are identified.
+message KeysightHwConfig {
+}
+
+// Configuration for a custom or third-party platform. Allows any vendor to implement
+// the CCB API without requiring schema changes. Platform-level key/value settings go
+// in PlatformConfig.custom_settings; per-binding settings go in PhysicalBindingConfig.custom_settings.
+message CustomPlatformConfig {
+
+  // Identifies the platform vendor or implementation. Informational only.
+  optional string vendor = 1;
+}
+
+// Strongly-typed configuration for the Keysight SCP simulation platform. Placeholder
+// — parameters will be added as requirements are identified.
+message KeysightScpSimConfig {
+}
+
+// TCPStore endpoint address used for Queue Pair negotiation when qp_negotiation is
+// tcp_store.
+message TcpStoreConfig {
+
+  // Hostname or IP address of the TCPStore. Default is localhost.
+  // default = localhost
+  optional string host = 1;
+
+  // Port number of the TCPStore.
+  // default = 12345
+  optional int32 port = 2;
+}
+
+// CCB benchmark configuration. Defines a collective communication test.
+message CcbBenchmark {
+
+  // The collective communication algorithm to use.
+  Algorithm collective_algorithm = 1;
+
+  message DatasizeMode {
+    enum Enum {
+      unspecified = 0;
+      multiplier = 1;
+      list = 2;
+    }
+  }
+  // Selects the data size specification. multiplier iterates from start to end by repeatedly
+  // multiplying by a factor. list uses an explicit set of sizes. Default is list.
+  // default = DatasizeMode.Enum.list
+  optional DatasizeMode.Enum datasize_mode = 2;
+
+  // Data size range using a multiplier. Active when datasize_mode is multiplier.
+  CcbDatasize multiplier = 3;
+
+  // Explicit list of data sizes. Active when datasize_mode is list.
+  CcbDatasizeList list = 4;
+
+  // Number of benchmark runs per data size.
+  // default = 1
+  optional int64 iterations = 5;
+
+  // The channels topology configuration specifying how ranks are distributed and connected.
+  ChannelsTopology channels = 6;
+
+  // Additional delay in milliseconds between repeated executions of the benchmark.
+  // default = 100
+  optional int32 iteration_append_delay = 7;
+}
+
+// Data size range specification for a CCB benchmark. Starting at start, each subsequent
+// size is obtained by multiplying by multiplier, continuing until end is reached.
+message CcbDatasize {
+
+  // Initial data size in bytes. Default 134217728 (128 MiB).
+  // default = 134217728
+  optional int64 start = 1;
+
+  // Factor by which the data size is multiplied at each step.
+  // default = 2
+  optional int32 multiplier = 2;
+
+  // Maximum data size in bytes. The last size run is the largest value not exceeding
+  // end. Default 4294967296 (4 GiB).
+  // default = 4294967296
+  optional int64 end = 3;
+}
+
+// Explicit list of data sizes for a CCB benchmark.
+message CcbDatasizeList {
+
+  // List of data sizes in bytes. Default [1073741824] (1 GiB).
+  // default = [1073741824]
+  repeated int64 size_bytes = 1;
+}
+
+// Specifies a collective communication algorithm — either a system-provided implementation
+// or a custom user-provided one.
+message Algorithm {
+
+  message AlgorithmCategory {
+    enum Enum {
+      unspecified = 0;
+      system = 1;
+      custom = 2;
+    }
+  }
+  // Selects whether to use a system-provided or custom algorithm. Default is system.
+  // default = AlgorithmCategory.Enum.system
+  optional AlgorithmCategory.Enum algorithm_category = 1;
+
+  message System {
+    enum Enum {
+      unspecified = 0;
+      all_to_all_parallel = 1;
+      all_to_all_pxn = 2;
+      all_reduce_unidirectional_ring = 3;
+      all_reduce_bidirectional_ring = 4;
+      all_reduce_vector_halving_doubling = 5;
+      all_reduce_double_binary_tree = 6;
+      all_gather_ring = 7;
+      reduce_scatter_ring = 8;
+      broadcast_parallel = 9;
+      gather_parallel = 10;
+      all_to_all_parallel_pp = 11;
+      all_to_all_pxn_pp = 12;
+      all_reduce_unidirectional_ring_pp = 13;
+      all_reduce_bidirectional_ring_pp = 14;
+      all_reduce_vector_halving_doubling_pp = 15;
+    }
+  }
+  // A system-supplied collective algorithm. Active when algorithm_category is system.
+  // Default is all_to_all_parallel. _pp suffix variants are MSCCL++ implementations.
+  // default = System.Enum.all_to_all_parallel
+  optional System.Enum system = 2;
+
+  // A path of format package.module.classname to a class that inherits from keys_ai_ml_chakra.Expander.
+  // Active when algorithm_category is custom.
+  optional string custom = 3;
+
+  // Configuration for the flow control mechanism used by this algorithm.
+  FlowControl flow_control_config = 4;
+}
+
+// Flow control mechanism configuration. Receiver grants credits to sender to control
+// data flow.
+message FlowControl {
+
+  // Enable flow control. Default false.
+  // default = False
+  optional bool enable_flow_control = 1;
+
+  // Maximum number of credits allowed in flight.
+  // default = 4
+  optional int32 max_inflight_credits = 2;
+
+  message CreditDistribution {
+    enum Enum {
+      unspecified = 0;
+      all_streams = 1;
+      single_stream = 2;
+    }
+  }
+  // Determines how credits are distributed across streams. all_streams: one credit unblocks
+  // all streams simultaneously. single_stream: one credit unblocks one stream at a time.
+  // Default is all_streams.
+  // default = CreditDistribution.Enum.all_streams
+  optional CreditDistribution.Enum credit_distribution = 3;
+
+  message DelayType {
+    enum Enum {
+      unspecified = 0;
+      manual = 1;
+      automatic = 2;
+    }
+  }
+  // Selects whether compute delay is manually configured or automatically derived.
+  // default = DelayType.Enum.manual
+  optional DelayType.Enum delay_type = 4;
+
+  // Manual compute delay configuration. Active when delay_type is manual.
+  ManualComputeDelay manual = 5;
+
+  // Automatic compute delay configuration. Active when delay_type is automatic.
+  AutomaticComputeDelay automatic = 6;
+}
+
+// Manual compute delay configuration for flow control.
+message ManualComputeDelay {
+
+  // Delay between data reception and credit transmission in microseconds.
+  // default = 0
+  optional int32 compute_delay = 1;
+}
+
+// Automatic compute delay configuration for flow control. GPU type determines the compute
+// delay function used.
+message AutomaticComputeDelay {
+
+  message GpuType {
+    enum Enum {
+      unspecified = 0;
+      a100 = 1;
+      h100 = 2;
+    }
+  }
+  // GPU type used to derive the default compute delay. Default is a100.
+  // default = GpuType.Enum.a100
+  optional GpuType.Enum gpu_type = 1;
+}
+
+// Topology defining all communication channels in the system.
+message ChannelsTopology {
+
+  // List of all communication channels configured in the topology.
+  repeated Channel channels = 1;
+}
+
+// A communication channel defining how collective operations are executed across ranks.
+message Channel {
+
+  message AlgorithmType {
+    enum Enum {
+      unspecified = 0;
+      all_to_all_parallel = 1;
+      all_to_all_pxn = 2;
+      all_reduce_unidirectional_ring = 3;
+      all_reduce_bidirectional_ring = 4;
+      all_reduce_vector_halving_doubling = 5;
+      all_reduce_double_binary_tree = 6;
+      all_gather_ring = 7;
+      reduce_scatter_ring = 8;
+      broadcast_parallel = 9;
+      gather_parallel = 10;
+      all_to_all_parallel_pp = 11;
+      all_to_all_pxn_pp = 12;
+      all_reduce_unidirectional_ring_pp = 13;
+      all_reduce_bidirectional_ring_pp = 14;
+      all_reduce_vector_halving_doubling_pp = 15;
+    }
+  }
+  // The communication algorithm used for collective operations on this channel. _pp suffix
+  // variants are MSCCL++ implementations.
+  optional AlgorithmType.Enum algorithm_type = 1;
+
+  // How ranks are mapped and ordered within this channel.
+  RankDistribution rank_distribution = 2;
+}
+
+// Defines how ranks are distributed across a communication channel.
+message RankDistribution {
+
+  message Distribution {
+    enum Enum {
+      unspecified = 0;
+      ascending = 1;
+      descending = 2;
+      interleaved = 3;
+      custom = 4;
+    }
+  }
+  // The rank ordering scheme. ascending: 0, 1, 2, 3, ... descending: N, N-1, N-2, ...
+  // interleaved: 0, N/2, 1, N/2+1, ... custom: explicit order specified in custom_order.
+  optional Distribution.Enum distribution = 1;
+
+  // Explicit list of rank IDs in the desired order. Only applicable when distribution
+  // is custom.
+  repeated int32 custom_order = 2;
+}
+
+// Container for configuring network impairments applied during a trial.
+message Impairments {
+
+  // Packet drop impairment configuration.
+  PacketDrop packet_drop = 1;
+
+  // Packet reorder impairment configuration.
+  PacketReorder packet_reorder = 2;
+}
+
+// Simulates packet loss by dropping packets matching any of the specified conditions.
+message PacketDrop {
+
+  // Whether packet drop impairment is active. Default false.
+  // default = False
+  optional bool enabled = 1;
+
+  // List of match condition sets (OR logic). Packets matching any set are dropped.
+  repeated MatchConditions match_conditions = 2;
+
+  // Number of matching packets to skip before dropping.
+  // default = 0
+  optional int32 skip_count = 3;
+
+  // Number of consecutive packets to drop after skip_count.
+  // default = 1
+  optional int32 drop_count = 4;
+}
+
+// Simulates out-of-order packet delivery for testing reordering resilience.
+message PacketReorder {
+
+  // Whether packet reorder impairment is active. Default false.
+  // default = False
+  optional bool enabled = 1;
+
+  // List of match condition sets (OR logic).
+  repeated MatchConditions match_conditions = 2;
+
+  // Number of matching packets to skip before reordering.
+  // default = 0
+  optional int32 skip_count = 3;
+
+  // Number of packets to send out-of-order. reorder_count + hold_count must be less than
+  // 512.
+  // default = 1
+  optional int32 reorder_count = 4;
+
+  // Number of packets to delay before sending the reordered packets.
+  // default = 1
+  optional int32 hold_count = 5;
+}
+
+// A set of match conditions — all are required (ANDed).
+message MatchConditions {
+
+  message Location {
+    enum Enum {
+      unspecified = 0;
+      src = 1;
+      dst = 2;
+    }
+  }
+  // Whether to impair at the source (sender) or destination (receiver) side. Default
+  // is src.
+  // default = Location.Enum.src
+  optional Location.Enum location = 1;
+
+  // Collective communication flow to match.
+  CollectiveMatchConditions collective = 2;
+
+  // Packet-level conditions to match.
+  repeated PacketConditions packet = 3;
+}
+
+// Match conditions for a collective communication flow between two NICs.
+message CollectiveMatchConditions {
+
+  // Reference to the source network interface card.
+  InfraRef src_nic = 1;
+
+  // Reference to the destination network interface card.
+  InfraRef dst_nic = 2;
+
+  // Index identifying a specific flow between source and destination.
+  // default = 0
+  optional int32 flow_index = 3;
+}
+
+// Packet-level match conditions. Supports different protocol-specific criteria.
+message PacketConditions {
+
+  message PacketConditionsType {
+    enum Enum {
+      unspecified = 0;
+      rdma = 1;
+    }
+  }
+  // The type of packet conditions to match.
+  optional PacketConditionsType.Enum packet_conditions_type = 1;
+
+  // RDMA-specific match conditions. Active when packet_conditions_type is rdma.
+  RdmaMatchConditions rdma = 2;
+}
+
+// Match conditions for RDMA packets. Allows matching on multiple opcodes simultaneously.
+message RdmaMatchConditions {
+
+  // List of RDMA opcodes to match (OR logic).
+  repeated RdmaOpcodeMatch opcode_list = 1;
+}
+
+// Matches a specific RDMA packet opcode type.
+message RdmaOpcodeMatch {
+
+  message Value {
+    enum Enum {
+      unspecified = 0;
+      first = 1;
+      middle = 2;
+      last = 3;
+      source_any = 4;
+      ack = 5;
+      nack = 6;
+      destination_any = 7;
+    }
+  }
+  // The RDMA opcode value to match. first: RDMA Write/Send first packet. middle: RDMA
+  // Write/Send middle packet. last: RDMA Write/Send last packet. source_any: any packet
+  // sent by source. ack: acknowledgment from destination. nack: negative acknowledgment
+  // from destination. destination_any: any packet sent by destination. Default is source_any.
+  // default = Value.Enum.source_any
+  optional Value.Enum value = 1;
+}
+
+// A reference to a logical infrastructure element.
+message InfraRef {
+
+  // Name of the logical infrastructure device (e.g. the value set for dse_infra.GenericHost.name).
+  optional string device_instance_name = 1;
+
+  // Zero-based device index.
+  optional int32 device_index = 2;
+
+  // Name of the logical infrastructure component.
+  optional string component_name = 3;
+
+  // Zero-based component index.
+  optional int32 component_index = 4;
+}
+
+// Maps ranks to logical NPUs, configures NIC settings, and assigns physical test resources.
+message CustomBinding {
+
+  // List of bindings that map each rank to a specific logical NPU and its available NICs.
+  repeated RankBinding rank_bindings = 1;
+
+  // List of NIC configuration bindings specifying settings and associated physical bindings.
+  repeated NicBinding nic_bindings = 2;
+
+  // List of bindings that associate logical infrastructure elements with physical test
+  // resources.
+  repeated PhysicalBinding physical_bindings = 3;
+}
+
+// Assigns a rank to a logical NPU and lists the NICs available to that NPU.
+message RankBinding {
+
+  // Reference to the NPU used by this rank.
+  InfraRef infra_ref = 1;
+
+  // The unique identifier for this rank in the distributed workload.
+  optional int32 rank_id = 2;
+
+  // List of NICs available to this NPU (in the same host).
+  repeated InfraRef nic_refs = 3;
+}
+
+// Binds logical NIC settings to a NIC defined in the Chakra infrastructure.
+message NicBinding {
+
+  // Reference to a NIC defined in the Chakra infrastructure.
+  InfraRef infra_ref = 1;
+
+  // NIC configuration settings. Auto-populated but can be overridden by the user.
+  NicSettings nic_settings = 2;
+
+  // Flows from this NIC may be generated by test ports from any of these associated physical
+  // bindings.
+  repeated InfraRef associated_physical_bindings = 3;
+}
+
+// Binds a logical infrastructure element to a physical test resource, specifying platform
+// type and per-platform configuration.
+message PhysicalBinding {
+
+  // Reference to the logical infrastructure element that the physical resource represents.
+  InfraRef infra_ref = 1;
+
+  // The platform name for this physical binding. When set, takes precedence over any
+  // platform assigned to the binding's infrastructure region via PlatformConfig. leave
+  // blank to defer to the region assignment.
+  optional string platform_name = 2;
+
+  // Per-platform configuration for this physical binding.
+  PhysicalBindingConfig config = 3;
+}
+
+// Per-binding platform configuration. The active sub-object is determined by PhysicalBinding.platform.
+// Multiple sub-objects may be present but only the one matching the binding's platform
+// is used.
+message PhysicalBindingConfig {
+
+  // Generic key/value settings for this physical binding. May be used by all platforms
+  // for testing purposes. For platform=custom, this is the primary binding configuration
+  // — pass all vendor-specific binding parameters here.
+  StringMap custom_settings = 1;
+
+  // Binding settings specific to the Keysight NCCL test platform.
+  BindingKeysightNcclTestConfig keysight_nccl_test = 2;
+
+  // Binding settings specific to the Keysight software agent platform.
+  BindingKeysightSwConfig keysight_sw = 3;
+
+  // Binding settings specific to the Keysight hardware platform.
+  BindingKeysightHwConfig keysight_hw = 4;
+}
+
+// Physical binding settings for the Keysight hardware platform.
+message BindingKeysightHwConfig {
+
+  // Chassis location for this binding.
+  ChassisInfo chassis_location = 1;
+
+  // Layer 1 physical settings such as link speed, duplex mode, and FEC.
+  Layer1 layer1 = 2;
+
+  // PRIVATE: Packet capture settings.
+  PacketCapture capture = 3;
+}
+
+// Physical binding settings for the Keysight software agent platform.
+message BindingKeysightSwConfig {
+
+  // Server location for this binding.
+  ServerInfo server_location = 1;
+
+  // Layer 1 physical settings such as link speed, duplex mode, and FEC.
+  Layer1 layer1 = 2;
+
+  // PRIVATE: Packet capture settings.
+  PacketCapture capture = 3;
+}
+
+// Physical binding settings for the Keysight NCCL test platform.
+message BindingKeysightNcclTestConfig {
+
+  // Server location for this binding.
+  ServerInfo server_location = 1;
+
+  // Layer 1 physical settings such as link speed, duplex mode, and FEC.
+  Layer1 layer1 = 2;
+
+  // PRIVATE: Packet capture settings.
+  PacketCapture capture = 3;
+}
+
+// Information about a hardware appliance with a management interface and network ports
+message ChassisInfo {
+
+  // Chassis IP address or FQDN.
+  optional string address = 1;
+
+  // Chassis port. Format: <front-panel-port> or <front-panel-port>.<fanout>. Examples:
+  // '1' or '1.4'. Default is '1'.
+  optional string port = 2;
+}
+
+// Information about a server used for emulation.
+message ServerInfo {
+
+  // Server IP address or FQDN.
+  optional string address = 1;
+
+  // NIC interface name on the server.
+  optional string nic_interface = 2;
+}
+
+// Network Interface Card configuration settings.
+message NicSettings {
+
+  // Ethernet Maximum Transmission Unit in bytes.
+  // default = 8192
+  optional int32 ethernet_mtu = 1;
+
+  // IP addressing configuration (IPv4 or IPv6).
+  NicIpAddressing ip_addressing = 2;
+
+  // PRIVATE: Quality of service configuration.
+  Qos qos = 3;
+
+  // Congestion control configuration (ECN, PFC, DCQCN).
+  CongestionControl congestion_control = 4;
+
+  // PRIVATE: Packet capture settings for this NIC.
+  PacketCapture packet_capture = 5;
+
+  // MAC address. Default 00:00:00:00:00:00 means auto-assigned.
+  // default = 00:00:00:00:00:00
+  optional string mac_address = 6;
+
+  // VLAN configuration.
+  Vlan vlan = 7;
+
+  // Transport-specific NIC settings.
+  NicTransport transport = 8;
+}
+
+// IP addressing configuration for a NIC — selects between IPv4 and IPv6.
+message NicIpAddressing {
+
+  message IpVersion {
+    enum Enum {
+      unspecified = 0;
+      ipv4 = 1;
+      ipv6 = 2;
+    }
+  }
+  // Selects the IP addressing mode for this NIC.
+  optional IpVersion.Enum ip_version = 1;
+
+  // IPv4 addressing configuration. Active when ip_version is ipv4.
+  Ipv4Addressing ipv4 = 2;
+
+  // IPv6 addressing configuration. Active when ip_version is ipv6.
+  Ipv6Addressing ipv6 = 3;
+}
+
+// Transport-specific NIC settings.
+message NicTransport {
+
+  // RoCEv2 transport-specific NIC settings.
+  Rocev2TransportSettings rocev2 = 1;
+}
+
+// IPv4 addressing configuration for a NIC.
+message Ipv4Addressing {
+
+  // IPv4 address.
+  // default = 192.0.2.2
+  optional string ip_address = 1;
+
+  // IPv4 prefix length.
+  // default = 24
+  optional int32 ip_prefix = 2;
+
+  // Gateway IPv4 address.
+  // default = 192.0.2.1
+  optional string ip_gateway_address = 3;
+}
+
+// IPv6 addressing configuration for a NIC.
+message Ipv6Addressing {
+
+  // IPv6 address.
+  // default = 2001:db8::2
+  optional string ip_address = 1;
+
+  // IPv6 prefix length.
+  // default = 32
+  optional int32 ip_prefix = 2;
+
+  // Gateway IPv6 address.
+  // default = 2001:db8::1
+  optional string ip_gateway_address = 3;
+}
+
+// VLAN configuration.
+message Vlan {
+
+  // Enable or disable VLAN.
+  // default = False
+  optional bool enabled = 1;
+
+  // List of VLAN tags. Currently one tag is supported.
+  repeated VlanTag vlan_tags = 2;
+}
+
+// A single VLAN tag.
+message VlanTag {
+
+  // VLAN priority (802.1p). Default 0.
+  // default = 0
+  optional int32 priority = 1;
+
+  // VLAN ID. Default 1.
+  // default = 1
+  optional int32 vlan_id = 2;
+}
+
+// RoCEv2 transport-specific NIC settings.
+message Rocev2TransportSettings {
+
+  // DSCP value for RoCEv2 ACK packets.
+  // default = 26
+  optional int32 ack_dscp = 1;
+
+  // DSCP value for RoCEv2 NACK packets.
+  // default = 26
+  optional int32 nack_dscp = 2;
+
+  // DSCP value for RoCEv2 data packets.
+  // default = 26
+  optional int32 data_dscp = 3;
+}
+
+// Congestion control mechanism configuration.
+message CongestionControl {
+
+  // Explicit Congestion Notification (ECN) configuration.
+  ExplicitCongestionNotifications ecn = 1;
+
+  // Priority Flow Control (PFC) configuration.
+  PriorityFlowControl pfc = 2;
+
+  // Data Center Quantized Congestion Notification (DCQCN) rate control configuration.
+  DCQCNRateControl dcqcn_rate_control = 3;
+}
+
+// ECN (Explicit Congestion Notification) configuration.
+message ExplicitCongestionNotifications {
+
+  // DSCP of Congestion Notification Packets (CNP).
+  // default = 48
+  optional int32 cnp_dscp = 1;
+
+  message DataEcnBits {
+    enum Enum {
+      unspecified = 0;
+      disabled = 1;
+      ect1 = 2;
+      ect0 = 3;
+    }
+  }
+  // ECN bits for data packets. disabled: 00 Non-ECT — ECN not supported. ect1: 01 ECT(1)
+  // — ECN-capable transport. ect0: 10 ECT(0) — ECN-capable transport (alternate codepoint).
+  // default = DataEcnBits.Enum.ect1
+  optional DataEcnBits.Enum data_ecn_bits = 2;
+
+  message ControlEcnBits {
+    enum Enum {
+      unspecified = 0;
+      disabled = 1;
+      ect1 = 2;
+      ect0 = 3;
+    }
+  }
+  // ECN bits for control packets (e.g. RoCEv2 ACKs). disabled: 00 Non-ECT — ECN not supported.
+  // ect1: 01 ECT(1) — ECN-capable transport. ect0: 10 ECT(0) — ECN-capable transport
+  // (alternate codepoint).
+  // default = ControlEcnBits.Enum.ect1
+  optional ControlEcnBits.Enum control_ecn_bits = 3;
+
+  message CnpEcnBits {
+    enum Enum {
+      unspecified = 0;
+      disabled = 1;
+      ect1 = 2;
+      ect0 = 3;
+    }
+  }
+  // ECN bits for CNP packets. disabled: 00 Non-ECT — ECN not supported. ect1: 01 ECT(1)
+  // — ECN-capable transport. ect0: 10 ECT(0) — ECN-capable transport (alternate codepoint).
+  // default = CnpEcnBits.Enum.ect1
+  optional CnpEcnBits.Enum cnp_ecn_bits = 4;
+}
+
+// Priority Flow Control (PFC) configuration.
+message PriorityFlowControl {
+
+  // Enable or disable Priority Flow Control.
+  // default = True
+  optional bool enabled = 1;
+
+  // List of priorities (0-7) for which PFC is enabled.
+  // default = [3]
+  repeated int32 priorities = 2;
+}
+
+// DCQCN (Data Center Quantized Congestion Notification) rate control settings.
+message DCQCNRateControl {
+
+  // Enable or disable DCQCN. Default false.
+  // default = False
+  optional bool enabled = 1;
+
+  // Factor to update Alpha every update period (fixed point fraction of 2^10).
+  // default = 1019
+  optional int32 alpha_factor = 2;
+
+  // Alpha update period in microseconds.
+  // default = 21
+  optional int32 alpha_interval = 3;
+
+  // Initial Alpha value.
+  // default = 1023
+  optional int32 initial_alpha = 4;
+
+  // Current and target rate limit set after first CNP in Mbps.
+  // default = 10000
+  optional int32 rate_after_first_cnp = 5;
+
+  // Maximal ratio of rate decrease in a single event (percentage).
+  // default = 50
+  optional float rate_decrement_factor = 6;
+
+  // Minimal rate limit of the QP in Mbps.
+  // default = 1
+  optional int32 min_rate_limit = 7;
+
+  // The coefficient between Alpha and the rate reduction factor.
+  // default = 11
+  optional int32 rate_decrement_coefficient = 8;
+
+  // Minimum time period between rate reductions in microseconds.
+  // default = 21
+  optional int32 rate_decrement_interval = 9;
+
+  // When a CNP is processed, update the target rate to the current rate. Default false.
+  // default = False
+  optional bool clamp_target_rate = 10;
+
+  // Time period between rate increase events in microseconds.
+  // default = 300
+  optional int32 rate_increment_interval = 11;
+
+  // Sent bytes counter between rate increase events (unit: 64B).
+  // default = 32767
+  optional int32 rate_increment_byte_counter = 12;
+
+  // Threshold of rate increase events for moving to next rate increase phase.
+  // default = 1
+  optional int32 rate_increment_threshold = 13;
+
+  // Rate increase value in the Additive Increase phase in Mbps.
+  // default = 5
+  optional int32 additive_rate_increment = 14;
+
+  // Rate increase value in the Hyper Increase phase in Mbps.
+  // default = 50
+  optional int32 hyper_rate_increment = 15;
+
+  // Minimal time between two consecutive CNPs sent in microseconds.
+  // default = 4
+  optional int32 time_between_cnps = 16;
+}
+
+// PRIVATE: Quality of Service configuration.
+message Qos {
+
+  message PriorityTrustMode {
+    enum Enum {
+      unspecified = 0;
+      dscp = 1;
+    }
+  }
+  // PRIVATE: Priority trust mode. dscp = trust based on Differentiated Services Code
+  // Point.
+  optional PriorityTrustMode.Enum priority_trust_mode = 1;
+
+  // PRIVATE: DSCP to priority mapping. Keys and values are integers.
+  IntegerMap map_dscp_to_prio = 2;
+
+  // PRIVATE: Priority to traffic class mapping. Keys and values are integers.
+  IntegerMap map_prio_to_traffic_class = 3;
+}
+
+// PRIVATE: Packet capture configuration.
+message PacketCapture {
+
+  // PRIVATE: Enable or disable packet capture.
+  // default = False
+  optional bool enabled = 1;
+
+  // PRIVATE: Maximum capture file size in bytes. Default 10485760 (10 MiB).
+  // default = 10485760
+  optional int32 capture_max_file_size = 2;
+
+  message BufferFullAction {
+    enum Enum {
+      unspecified = 0;
+      override = 1;
+      stop = 2;
+    }
+  }
+  // PRIVATE: Action when capture buffer is full. override: overwrite current buffer and
+  // save its contents. stop: stop capture and dump data to file. Default is override.
+  // default = BufferFullAction.Enum.override
+  optional BufferFullAction.Enum buffer_full_action = 3;
+
+  // PRIVATE: Size of each packet slice in bytes. 0 means capture entire packet.
+  // default = 80
+  optional int32 packet_slice_size = 4;
+}
+
+// Assigns a platform to a region within the infrastructure.
+message PlatformRegion {
+
+  // The infrastructure region to which a platform is assigned.
+  InfraRegion region = 1;
+
+  // The name of the platform assigned to this infrastructure region.
+  optional string platform = 2;
+}
+
+// Defines a region within the infrastructure by specifying boundary components.
+message InfraRegion {
+
+  // Components that mark the boundary of this region within the infrastructure.
+  repeated InfraRef boundary_refs = 1;
+}
+
+// Specification for creating a set of named process groups. The server uses these to
+// derive the appropriate process groups. Example: prefix=DP, group_count=4 produces
+// groups DP1, DP2, DP3, DP4.
+message GroupSpec {
+
+  // Prefix for the process groups (e.g., DP produces groups named DP1, DP2, ..., DPn).
+  optional string prefix = 1;
+
+  // Total number of process groups to create with this prefix.
+  optional int32 group_count = 2;
+
+  // Number of ranks per process group. If omitted, derived from the total number of ranks
+  // divided by group_count.
+  optional int32 group_size = 3;
+
+  message AllocationStrategy {
+    enum Enum {
+      unspecified = 0;
+      sequential = 1;
+      round_robin = 2;
+      custom = 3;
+    }
+  }
+  // Strategy for allocating NPUs to the derived process groups.
+  // default = AllocationStrategy.Enum.sequential
+  optional AllocationStrategy.Enum allocation_strategy = 4;
+
+  // Sequential allocation strategy configuration. Active when allocation_strategy is
+  // sequential.
+  SequentialStrategy sequential = 5;
+
+  // Round-robin allocation strategy configuration. Active when allocation_strategy is
+  // round_robin.
+  RoundRobinStrategy round_robin = 6;
+
+  // Custom allocation strategy configuration. Active when allocation_strategy is custom.
+  CustomStrategy custom_strategy = 7;
+}
+
+// Sequential NPU allocation strategy. Allocates NPUs sequentially from the ordered
+// list of available NPUs.
+message SequentialStrategy {
+}
+
+// Round-robin NPU allocation strategy. Allocates NPUs in a round-robin fashion across
+// process groups.
+message RoundRobinStrategy {
+
+  // Round-robin step size.
+  // default = 1
+  optional int32 step = 1;
+}
+
+// Custom allocation strategy configuration.
+message CustomStrategy {
+}
+
+// Logical infrastructure profile describing the emulated infrastructure topology.
+message InfrastructureProfile {
+
+  // Profile name.
+  optional string name = 1;
+
+  // System-assigned globally unique profile ID.
+  optional string id = 2;
+
+  // The infrastructure configuration for this profile.
+  InfrastructureConfig infrastructure = 3;
+}
+
+// Infrastructure configuration comprising hosts and the network fabric.
+message InfrastructureConfig {
+
+  // Host configuration for the infrastructure.
+  InfrastructureHost host = 1;
+
+  // Fabric topology for the infrastructure.
+  InfrastructureFabric fabric = 2;
+}
+
+// High-level host specification for the infrastructure.
+message InfrastructureHost {
+
+  // Number of hosts in the fabric.
+  // default = 4
+  optional int32 count = 1;
+
+  message HostType {
+    enum Enum {
+      unspecified = 0;
+      generic = 1;
+      rackplane = 2;
+    }
+  }
+  // The host type. Default is generic.
+  // default = HostType.Enum.generic
+  optional HostType.Enum host_type = 2;
+
+  // Generic host configuration. Active when host_type is generic.
+  GenericHost generic = 3;
+
+  // Rack-plane host configuration. Active when host_type is rackplane. Intended for use
+  // with a rackplane fabric topology.
+  RackPlaneHost rackplane = 4;
+
+  // Emulate data transfer over NPU-to-NPU links within each host. When true, data transfers
+  // between interconnected ranks within a host are emulated.
+  // default = False
+  optional bool use_npu_interconnect = 5;
+}
+
+// Generic host builder parameters. Generic hosts have a 1:1 ratio of NICs and NPUs.
+message GenericHost {
+
+  // The name of this generic host instance.
+  optional string name = 1;
+
+  // Number of Neural Processing Units (NPUs) in the host.
+  // default = 1
+  optional int32 npu_count = 2;
+
+  // NPU interconnect bandwidth within the host in Gbps. A value of 0 means no NPU-to-NPU
+  // interconnect within the host. If non-zero, each NPU within the host is interconnected
+  // via a generic link attached to a single generic switch.
+  // default = 1600
+  optional int32 npu_interconnect_bandwidth_gbps = 3;
+}
+
+// Describes the overall fabric topology.
+message InfrastructureFabric {
+
+  message FabricType {
+    enum Enum {
+      unspecified = 0;
+      blackbox = 1;
+      rackplane = 2;
+    }
+  }
+  // The type of fabric topology. Default is blackbox.
+  // default = FabricType.Enum.blackbox
+  optional FabricType.Enum fabric_type = 1;
+
+  // Non-detailed generic fabric where internal topology is not modeled. Active when fabric_type
+  // is blackbox.
+  BlackboxFabric blackbox = 2;
+
+  // Multi-plane rack fabric topology. Active when fabric_type is rackplane.
+  RackPlaneFabric rackplane = 3;
+}
+
+// Host type intended for use with a rackplane fabric topology. Each host connects to
+// each fabric plane with dedicated scale-up NICs.
+message RackPlaneHost {
+
+  // The name of this rack-plane host instance.
+  optional string name = 1;
+
+  // Number of NPUs per host.
+  // default = 1
+  optional int32 npu_count = 2;
+
+  // Number of NICs connected to the scale-up network per host.
+  // default = 4
+  optional int32 scale_up_nic_count = 3;
+
+  // Number of NICs connected to the scale-out network per host.
+  // default = 0
+  optional int32 scale_out_nic_count = 4;
+}
+
+// Multi-plane rack fabric topology. The number of rack switches for intra-rack communication
+// is driven by RackPlaneHost.scale_up_nic_count. The number of scale-out switches for
+// inter-rack communication is driven by rack_count, RackPlaneHost.scale_out_nic_count,
+// and hosts_per_rack.
+message RackPlaneFabric {
+
+  // Number of racks in the fabric.
+  // default = 1
+  optional int32 rack_count = 1;
+
+  // Number of hosts per rack.
+  // default = 1
+  optional int32 hosts_per_rack = 2;
+
+  message ScaleOutSwitchSpeed {
+    enum Enum {
+      unspecified = 0;
+      speed_100g = 1;
+      speed_200g = 2;
+      speed_400g = 3;
+      speed_800g = 4;
+    }
+  }
+  // Ethernet speed for inter-rack communication via scale-out switches. Default is speed_800g.
+  // speed_100g: 100 Gigabit Ethernet. speed_200g: 200 Gigabit Ethernet. speed_400g: 400
+  // Gigabit Ethernet. speed_800g: 800 Gigabit Ethernet.
+  // default = ScaleOutSwitchSpeed.Enum.speed_800g
+  optional ScaleOutSwitchSpeed.Enum scale_out_switch_speed = 3;
+
+  message ScaleUpSwitchSpeed {
+    enum Enum {
+      unspecified = 0;
+      speed_100g = 1;
+      speed_200g = 2;
+      speed_400g = 3;
+      speed_800g = 4;
+    }
+  }
+  // Ethernet speed for intra-rack communication on the scale-up network. Default is speed_800g.
+  // speed_100g: 100 Gigabit Ethernet. speed_200g: 200 Gigabit Ethernet. speed_400g: 400
+  // Gigabit Ethernet. speed_800g: 800 Gigabit Ethernet.
+  // default = ScaleUpSwitchSpeed.Enum.speed_800g
+  optional ScaleUpSwitchSpeed.Enum scale_up_switch_speed = 4;
+}
+
+// A fabric where the internal topology is not modeled.
+message BlackboxFabric {
+
+  // Fabric name.
+  optional string name = 1;
+}
+
+// A map of string keys to string values.
+message StringMap {
+}
+
+// A map of string keys to integer values.
+message IntegerMap {
+}
+
+// AiWorkloadConfig contains all the information about an AiWorkload configuration to
+// apply before running
+message AiWorkload {
+
+  // Read-only info about the workload, e.g. server version.
+  AiWorkloadInfo info = 1;
+
+  message AppType {
+    enum Enum {
+      unspecified = 0;
+      collective_benchmark = 1;
+      workload_emulation = 2;
+    }
+  }
+  // Selects the workload type for the trial. Default is collective_benchmark.
+  // default = AppType.Enum.collective_benchmark
+  optional AppType.Enum app_type = 2;
+
+  // Collective Communication Benchmark (CCB) configuration. Active when app_type is collective_benchmark.
+  CcbConfig collective_benchmark = 3;
+
+  // Workload Emulation (WE) configuration. Active when app_type is workload_emulation.
+  WorkloadEmulationConfig workload_emulation = 4;
+
+  // Network impairment configuration applied during the trial.
+  Impairments impairments = 5;
+
+  // Resource bindings used for the trial run.
+  TrialBindings bindings = 6;
+
+  // Description missing in models
+  repeated PlatformConfig platform = 7;
+
+  // General information about the Trial Result to populate the Trial Result with. These
+  // fields in the Trial Result itself can be further edited after the test.
+  ResultInfo result_info_prefill = 8;
+}
+
+// Information about the AI Workload (AI Data Center Builder) application including
+// version, status, and build details.
+message AiWorkloadInfo {
+
+  // The version of the AI Workload application.
+  // Semver (semantic versioning) formatted version of containing object.
+  optional string version = 1;
+
+  // The date and time when the AI Workload application was built.
+  optional string build_date = 2;
+
+  // The version of the trial config.
+  // Semver (semantic versioning) formatted version of containing object.
+  optional string config_version = 3;
+}
+
 // Port specific configurations.
 message PerPortOptions {
 
@@ -15209,6 +16481,7 @@ message ControlState {
       port = 1;
       protocol = 2;
       traffic = 3;
+      ai_workload = 4;
     }
   }
   // Description missing in models
@@ -15223,6 +16496,9 @@ message ControlState {
 
   // Description missing in models
   StateTraffic traffic = 4;
+
+  // Description missing in models
+  StateAiWorkload ai_workload = 6;
 }
 
 // States associated with configured ports.
@@ -15305,6 +16581,23 @@ message StateProtocol {
 
   // Description missing in models
   StateProtocolRocev2 rocev2 = 9;
+}
+
+// States associated with the defined AI Workload config
+message StateAiWorkload {
+
+  message Choice {
+    enum Enum {
+      unspecified = 0;
+      ai_workload_trial = 1;
+    }
+  }
+  // Description missing in models
+  // default = Choice.Enum.ai_workload_trial
+  optional Choice.Enum choice = 1;
+
+  // Description missing in models
+  StateAiWorkloadTrial ai_workload_trial = 2;
 }
 
 // Sets the link of configured ports.
@@ -15788,6 +17081,29 @@ message StateProtocolIsisSimLinks {
   // LSP-ID of ST2: 770000000002-00-00: IS-Reachability Neighbors : ['770000000001']
   // LSP-ID of ST3: 770000000003-00-00: IS-Reachability Neighbors : ['770000000001']
   optional State.Enum state = 2;
+}
+
+// Provides state control of AI Workload Trials
+message StateAiWorkloadTrial {
+
+  message State {
+    enum Enum {
+      unspecified = 0;
+      start = 1;
+      stop = 2;
+    }
+  }
+  // The requested trial state.
+  // 
+  // If the value of the state property is 'start' then the trial will be run, if possible.
+  // 
+  // If the value of the state property is 'stop' then the trial will be stopped before
+  // automatically
+  // completing. Normally the trial will automatically stop when all the requested combinations
+  // have
+  // been executed, so this is not normally needed.
+  // required = true
+  optional State.Enum state = 1;
 }
 
 // Request for triggering action against configured resources.
@@ -19392,6 +20708,7 @@ message StatesRequest {
       ospfv3_lsas = 12;
       isis_adjacencies = 13;
       bmp_servers = 14;
+      ai_workload = 15;
     }
   }
   // Description missing in models
@@ -19439,6 +20756,9 @@ message StatesRequest {
 
   // Description missing in models
   BmpServersStateRequest bmp_servers = 15;
+
+  // Description missing in models
+  AiWorkloadStateRequest ai_workload = 16;
 }
 
 // Response containing chosen traffic generator states
@@ -19461,6 +20781,7 @@ message StatesResponse {
       ospfv3_lsas = 12;
       isis_adjacencies = 13;
       bmp_servers = 14;
+      ai_workload = 15;
     }
   }
   // Description missing in models
@@ -19508,6 +20829,9 @@ message StatesResponse {
 
   // Description missing in models
   repeated BmpServerState bmp_servers = 15;
+
+  // Description missing in models
+  AiWorkloadState ai_workload = 16;
 }
 
 // The request to retrieve IPv4 Neighbor state (ARP cache entries) of a network interface(s).
@@ -22332,6 +23656,42 @@ message BmpPrefixIpv6UnicastState {
   // The multi exit discriminator (MED) is an optional non-transitive attribute and the
   // value is used for route selection. The route with the lowest MED value is preferred.
   optional uint32 multi_exit_discriminator = 13;
+}
+
+// The request to retrieve the config and run states of the configured AI workload.
+message AiWorkloadStateRequest {
+}
+
+// The config and run states of the AI workload. An AI workload has two independent
+// states: the config state, which tracks the lifecycle of the workload's configuration,
+// and the run state, which tracks the lifecycle of the workload's automated execution.
+message AiWorkloadState {
+
+  // The ISO 8601 formatted time the run was started
+  optional string start_time = 1;
+
+  // The ISO 8601 formatted time the run ended
+  optional string stop_time = 2;
+
+  // Description missing in models
+  Warning success_status = 3;
+
+  // Description missing in models
+  Error failure_status = 5;
+
+  message TrialState {
+    enum Enum {
+      unspecified = 0;
+      unrun = 1;
+      started = 2;
+      stopping = 3;
+      stopped = 4;
+      success = 5;
+      failure = 6;
+    }
+  }
+  // The current lifecycle state of the AI workload's trial run.
+  optional TrialState.Enum trial_state = 4;
 }
 
 // The capture result request to the traffic generator.

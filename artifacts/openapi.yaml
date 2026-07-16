@@ -357,6 +357,11 @@ components:
           items:
             $ref: '#/components/schemas/EgressOnlyTracking'
           x-field-uid: 11
+        ai_workload:
+          description: |-
+            The AI Data Center Builder application configuration
+          $ref: '#/components/schemas/AiWorkload'
+          x-field-uid: 101
     Config.Options:
       description: |-
         Global configuration options.
@@ -3303,140 +3308,61 @@ components:
           - inline_crypto
     Layer1:
       description: |-
-        A container for layer1 settings.
+        Layer 1 physical configuration for a test port.
       type: object
-      required:
-      - port_names
-      - name
       properties:
-        port_names:
-          description: "A list of unique names of port objects that will share the\n\
-            choice settings. \n\nx-constraint:\n- /components/schemas/Port/properties/name\n"
-          type: array
-          items:
-            type: string
-          x-constraint:
-          - /components/schemas/Port/properties/name
+        speed_mode:
+          type: string
+          description: |-
+            Speed, modulation, and FEC mode for the physical link. Default is speed_400ge_pam4_106g_kp4_fec.
           x-field-uid: 1
-        speed:
-          description: |-
-            Set the speed if supported. When no speed is explicitly set, the current
-            speed of underlying test interface shall be assumed.
-          type: string
-          x-field-uid: 2
           x-enum:
-            speed_10_fd_mbps:
+            speed_800ge_pam4_106g_kp4_fec:
               x-field-uid: 1
-            speed_10_hd_mbps:
+            speed_400ge_pam4_106g_kp4_fec:
               x-field-uid: 2
-            speed_100_fd_mbps:
+            speed_400ge_pam4_53g_kp4_fec:
               x-field-uid: 3
-            speed_100_hd_mbps:
+            speed_200ge_pam4_106g_kp4_fec:
               x-field-uid: 4
-            speed_1_gbps:
+            speed_200ge_pam4_53g_kp4_fec:
               x-field-uid: 5
-            speed_10_gbps:
+            speed_100ge_pam4_106g_kp4_fec:
               x-field-uid: 6
-            speed_25_gbps:
+            speed_100ge_pam4_106g_rs_fec:
               x-field-uid: 7
-            speed_40_gbps:
+            speed_100ge_pam4_53g_kp4_fec:
               x-field-uid: 8
-            speed_50_gbps:
+            speed_100ge_nrz_rs_fec:
               x-field-uid: 9
-            speed_100_gbps:
+            speed_100ge_nrz_no_fec:
               x-field-uid: 10
-            speed_200_gbps:
-              x-field-uid: 11
-            speed_400_gbps:
-              x-field-uid: 12
-            speed_800_gbps:
-              x-field-uid: 13
           enum:
-          - speed_10_fd_mbps
-          - speed_10_hd_mbps
-          - speed_100_fd_mbps
-          - speed_100_hd_mbps
-          - speed_1_gbps
-          - speed_10_gbps
-          - speed_25_gbps
-          - speed_40_gbps
-          - speed_50_gbps
-          - speed_100_gbps
-          - speed_200_gbps
-          - speed_400_gbps
-          - speed_800_gbps
-        media:
-          description: |-
-            Set the type of media for test interface if supported. When no media
-            type is explicitly set, the current media type of underlying test
-            interface shall be assumed.
-          type: string
-          x-field-uid: 3
-          x-enum:
-            copper:
-              x-field-uid: 1
-            fiber:
-              x-field-uid: 2
-            sgmii:
-              x-field-uid: 3
-          enum:
-          - copper
-          - fiber
-          - sgmii
-        promiscuous:
-          description: |-
-            Enable promiscuous mode on test interface. A warning shall be raised if
-            this field is set to `true`, even when it's not supported, ignoring
-            the setting altogether.
-          type: boolean
-          default: true
-          x-field-uid: 4
-        mtu:
-          description: |-
-            Set the maximum transmission unit size. A warning shall be raised if
-            the specified value is valid but not supported, ignoring the setting altogether.
-          type: integer
-          format: uint32
-          minimum: 64
-          maximum: 14000
-          default: 1500
-          x-field-uid: 5
-        ieee_media_defaults:
-          description: |-
-            Under Review: This field is currently under review for pending exploration on use cases
-
-            Set to true to override the auto_negotiate, link_training
-            and rs_fec settings for gigabit ethernet interfaces.
-          type: boolean
-          x-field-uid: 6
-          x-status:
-            status: under-review
-            information: This field is currently under review for pending exploration
-              on use cases
+          - speed_800ge_pam4_106g_kp4_fec
+          - speed_400ge_pam4_106g_kp4_fec
+          - speed_400ge_pam4_53g_kp4_fec
+          - speed_200ge_pam4_106g_kp4_fec
+          - speed_200ge_pam4_53g_kp4_fec
+          - speed_100ge_pam4_106g_kp4_fec
+          - speed_100ge_pam4_106g_rs_fec
+          - speed_100ge_pam4_53g_kp4_fec
+          - speed_100ge_nrz_rs_fec
+          - speed_100ge_nrz_no_fec
         auto_negotiate:
-          description: |-
-            Under Review: This field is currently under review for pending exploration on use cases, given that a separate configuration called `AutoNegotiation` already exists.
-
-            Enable/disable auto negotiation.
           type: boolean
-          x-field-uid: 7
-          x-status:
-            status: under-review
-            information: This field is currently under review for pending exploration
-              on use cases, given that a separate configuration called `AutoNegotiation`
-              already exists.
-        auto_negotiation:
-          $ref: '#/components/schemas/Layer1.AutoNegotiation'
-          x-field-uid: 8
-        flow_control:
-          $ref: '#/components/schemas/Layer1.FlowControl'
-          x-field-uid: 9
-        name:
-          x-field-uid: 10
           description: |-
-            Globally unique name of an object. It also serves as the primary key for arrays of objects.
-          type: string
-          x-unique: global
+            Enable or disable auto negotiation. Default false.
+          x-field-uid: 2
+        link_training:
+          type: boolean
+          description: |-
+            Enable or disable link training. Default false.
+          x-field-uid: 3
+        ieee_defaults:
+          type: boolean
+          description: |-
+            Enable or disable IEEE defaults. Takes precedence over auto_negotiate and link_training. Default false.
+          x-field-uid: 4
     Layer1.AutoNegotiation:
       description: |-
         Configuration for auto negotiation settings
@@ -18979,6 +18905,2003 @@ components:
           enum:
           - none
           - auto_macsec
+    FileInfo:
+      description: |-
+        Information about a file.
+      type: object
+      properties:
+        path:
+          type: string
+          description: |-
+            The path of the file.
+          x-field-uid: 1
+        size:
+          type: integer
+          description: |-
+            The size of the file in bytes.
+          x-field-uid: 2
+    TrialBindings:
+      description: |-
+        Describes test resources, how they are configured, and how they are attached to the topology.
+      type: object
+      properties:
+        custom_binding:
+          $ref: '#/components/schemas/CustomBinding'
+          description: |-
+            Custom binding that maps ranks to NPUs, configures NIC settings, and assigns physical test resources.
+          x-field-uid: 1
+        infrastructure_profile:
+          $ref: '#/components/schemas/InfrastructureProfile'
+          description: |-
+            A copy of the infrastructure profile used when the binding was created. Allows trials to be re-run with the original profile version.
+          x-field-uid: 2
+        infrastructure:
+          type: string
+          description: |-
+            Low-level Chakra infrastructure derived from the infrastructure_profile. JSON-encoded opaque value — see keysight_chakra.infra.Infrastructure.
+          x-field-uid: 3
+        infrastructure_annotations:
+          type: array
+          items:
+            type: string
+          description: |-
+            Annotations for the low-level Chakra infrastructure. JSON-encoded opaque values — see keysight_chakra.infra.Annotation.
+          x-field-uid: 4
+        platform_regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlatformRegion'
+          description: |-
+            Assigns platforms to different regions of the infrastructure.
+          x-field-uid: 5
+        group_specs:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupSpec'
+          description: |-
+            Specifications for creating named process groups. Each spec defines a prefix, count, optional size, and allocation strategy.
+          x-field-uid: 6
+    ResultInfo:
+      description: |-
+        General information about the Trial Result
+      properties:
+        tags:
+          description: |-
+            The list of tags associated with the trial.
+            List of tags associated with this object.
+          x-field-uid: 3
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+          default: []
+        description:
+          description: |-
+            A detailed description of the trial.
+            A detailed description of the object.
+          x-field-uid: 4
+          type: string
+      type: object
+    CcbResult:
+      description: |-
+        General information about the Trial Result
+      required:
+      - id
+      properties:
+        id:
+          description: |-
+            The ID of the trial.
+            The snowflake ID of the object. See https://blog.x.com/engineering/en_us/a/2010/announcing-snowflake
+          x-field-uid: 1
+          type: integer
+          format: int64
+        info:
+          $ref: '#/components/schemas/ResultInfo'
+          description: |-
+            General information about the Trial Result.
+          x-field-uid: 2
+        tags:
+          description: |-
+            The list of tags associated with the trial.
+            List of tags associated with this object.
+          x-field-uid: 3
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+          default: []
+        description:
+          description: |-
+            A detailed description of the trial.
+            A detailed description of the object.
+          x-field-uid: 4
+          type: string
+      type: object
+    CcbConfig:
+      description: |-
+        CCB (Collective Communication Benchmark) configuration.
+      type: object
+      properties:
+        benchmark:
+          $ref: '#/components/schemas/CcbBenchmark'
+          description: |-
+            The benchmark configuration defining the collective communication test.
+          x-field-uid: 1
+    WorkloadEmulationConfig:
+      description: |-
+        Workload Emulation (WE) configuration for a trial run. PLACEHOLDER: WE configuration schema is not yet defined.
+      type: object
+      properties:
+        placeholder:
+          type: string
+          description: |-
+            Placeholder property — WE configuration is not yet modelled. This field has no effect and will be removed in a future version.
+          x-field-uid: 1
+    PlatformConfig:
+      description: |-
+        Platform configuration for a trial run. Specifies per-platform typed settings.
+      type: object
+      properties:
+        name:
+          description: |-
+            The name of this platform
+          type: string
+          x-field-uid: 1
+        choice:
+          type: string
+          description: |-
+            The platform type to use for this trial run. unspecified: platform is not set; the server applies its default. keysight_nccl_test: Keysight NCCL test platform. keysight_sw: Keysight software simulation platform. keysight_hw: Keysight hardware platform (default for most trials). custom: custom or third-party platform; use PhysicalBindingConfig.custom_settings for binding parameters. keysight_scp_sim: Keysight SCP simulation platform.
+          x-field-uid: 2
+          x-enum:
+            keysight_nccl_test:
+              x-field-uid: 1
+            keysight_sw:
+              x-field-uid: 2
+            keysight_hw:
+              x-field-uid: 3
+            custom:
+              x-field-uid: 4
+            keysight_scp_sim:
+              x-field-uid: 5
+          enum:
+          - keysight_nccl_test
+          - keysight_sw
+          - keysight_hw
+          - custom
+          - keysight_scp_sim
+        custom_settings:
+          $ref: '#/components/schemas/StringMap'
+          description: |-
+            Generic key/value platform settings. May be used by all platforms for testing purposes. For platform=custom, this is the primary platform configuration — pass all vendor-specific parameters here.
+          x-field-uid: 3
+        keysight_nccl_test:
+          $ref: '#/components/schemas/KeysightNcclTestConfig'
+          description: |-
+            Configuration specific to the Keysight NCCL test platform.
+          x-field-uid: 4
+        keysight_sw:
+          $ref: '#/components/schemas/KeysightSwConfig'
+          description: |-
+            Configuration specific to the Keysight software agent platform.
+          x-field-uid: 5
+        keysight_hw:
+          $ref: '#/components/schemas/KeysightHwConfig'
+          description: |-
+            Configuration specific to the Keysight hardware platform.
+          x-field-uid: 6
+        custom:
+          $ref: '#/components/schemas/CustomPlatformConfig'
+          description: |-
+            Configuration for a custom or third-party platform. Use PhysicalBindingConfig.custom_settings for per-binding parameters.
+          x-field-uid: 7
+        keysight_scp_sim:
+          $ref: '#/components/schemas/KeysightScpSimConfig'
+          description: |-
+            Configuration specific to the Keysight SCP simulation platform.
+          x-field-uid: 8
+    KeysightNcclTestConfig:
+      description: |-
+        Configuration for the Keysight NCCL test platform.
+      type: object
+      properties:
+        nccl_env_vars:
+          $ref: '#/components/schemas/StringMap'
+          description: |-
+            NCCL environment variable overrides as name/value pairs.
+          x-field-uid: 1
+    KeysightSwConfig:
+      description: |-
+        Strongly-typed configuration for the Keysight software agent platform. Placeholder — parameters will be added as requirements are identified.
+      type: object
+    KeysightHwConfig:
+      description: |-
+        Strongly-typed configuration for the Keysight hardware platform. Placeholder — parameters will be added as requirements are identified.
+      type: object
+    CustomPlatformConfig:
+      description: |-
+        Configuration for a custom or third-party platform. Allows any vendor to implement the CCB API without requiring schema changes. Platform-level key/value settings go in PlatformConfig.custom_settings; per-binding settings go in PhysicalBindingConfig.custom_settings.
+      type: object
+      properties:
+        vendor:
+          type: string
+          description: |-
+            Identifies the platform vendor or implementation. Informational only.
+          x-field-uid: 1
+    KeysightScpSimConfig:
+      description: |-
+        Strongly-typed configuration for the Keysight SCP simulation platform. Placeholder — parameters will be added as requirements are identified.
+      type: object
+    TcpStoreConfig:
+      description: |-
+        TCPStore endpoint address used for Queue Pair negotiation when qp_negotiation is tcp_store.
+      type: object
+      properties:
+        host:
+          type: string
+          default: localhost
+          description: |-
+            Hostname or IP address of the TCPStore. Default is localhost.
+          x-field-uid: 1
+        port:
+          type: integer
+          default: 12345
+          minimum: 1024
+          maximum: 65535
+          description: |-
+            Port number of the TCPStore.
+          x-field-uid: 2
+    CcbBenchmark:
+      description: |-
+        CCB benchmark configuration. Defines a collective communication test.
+      type: object
+      properties:
+        collective_algorithm:
+          $ref: '#/components/schemas/Algorithm'
+          description: |-
+            The collective communication algorithm to use.
+          x-field-uid: 1
+        datasize_mode:
+          type: string
+          default: list
+          description: |-
+            Selects the data size specification. multiplier iterates from start to end by repeatedly multiplying by a factor. list uses an explicit set of sizes. Default is list.
+          x-field-uid: 2
+          x-enum:
+            multiplier:
+              x-field-uid: 1
+            list:
+              x-field-uid: 2
+          enum:
+          - multiplier
+          - list
+        multiplier:
+          $ref: '#/components/schemas/CcbDatasize'
+          description: |-
+            Data size range using a multiplier. Active when datasize_mode is multiplier.
+          x-field-uid: 3
+        list:
+          $ref: '#/components/schemas/CcbDatasizeList'
+          description: |-
+            Explicit list of data sizes. Active when datasize_mode is list.
+          x-field-uid: 4
+        iterations:
+          type: integer
+          format: int64
+          default: 1
+          minimum: 1
+          maximum: 4294967295
+          description: |-
+            Number of benchmark runs per data size.
+          x-field-uid: 5
+        channels:
+          $ref: '#/components/schemas/ChannelsTopology'
+          description: |-
+            The channels topology configuration specifying how ranks are distributed and connected.
+          x-field-uid: 6
+        iteration_append_delay:
+          type: integer
+          default: 100
+          minimum: 0
+          maximum: 10000
+          description: |-
+            Additional delay in milliseconds between repeated executions of the benchmark.
+          x-field-uid: 7
+    CcbDatasize:
+      description: |-
+        Data size range specification for a CCB benchmark. Starting at start, each subsequent size is obtained by multiplying by multiplier, continuing until end is reached.
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int64
+          default: 134217728
+          minimum: 1
+          description: |-
+            Initial data size in bytes. Default 134217728 (128 MiB).
+          x-field-uid: 1
+        multiplier:
+          type: integer
+          default: 2
+          minimum: 2
+          description: |-
+            Factor by which the data size is multiplied at each step.
+          x-field-uid: 2
+        end:
+          type: integer
+          format: int64
+          default: 4294967296
+          minimum: 1
+          description: |-
+            Maximum data size in bytes. The last size run is the largest value not exceeding end. Default 4294967296 (4 GiB).
+          x-field-uid: 3
+    CcbDatasizeList:
+      description: |-
+        Explicit list of data sizes for a CCB benchmark.
+      type: object
+      properties:
+        size_bytes:
+          type: array
+          items:
+            type: integer
+            format: int64
+            minimum: 1
+          default:
+          - 1073741824
+          description: |-
+            List of data sizes in bytes. Default [1073741824] (1 GiB).
+          x-field-uid: 1
+    Algorithm:
+      description: |-
+        Specifies a collective communication algorithm — either a system-provided implementation or a custom user-provided one.
+      type: object
+      properties:
+        algorithm_category:
+          type: string
+          default: system
+          description: |-
+            Selects whether to use a system-provided or custom algorithm. Default is system.
+          x-field-uid: 1
+          x-enum:
+            system:
+              x-field-uid: 1
+            custom:
+              x-field-uid: 2
+          enum:
+          - system
+          - custom
+        system:
+          type: string
+          default: all_to_all_parallel
+          description: |-
+            A system-supplied collective algorithm. Active when algorithm_category is system. Default is all_to_all_parallel. _pp suffix variants are MSCCL++ implementations.
+          x-field-uid: 2
+          x-enum:
+            all_to_all_parallel:
+              x-field-uid: 1
+            all_to_all_pxn:
+              x-field-uid: 2
+            all_reduce_unidirectional_ring:
+              x-field-uid: 3
+            all_reduce_bidirectional_ring:
+              x-field-uid: 4
+            all_reduce_vector_halving_doubling:
+              x-field-uid: 5
+            all_reduce_double_binary_tree:
+              x-field-uid: 6
+            all_gather_ring:
+              x-field-uid: 7
+            reduce_scatter_ring:
+              x-field-uid: 8
+            broadcast_parallel:
+              x-field-uid: 9
+            gather_parallel:
+              x-field-uid: 10
+            all_to_all_parallel_pp:
+              x-field-uid: 11
+            all_to_all_pxn_pp:
+              x-field-uid: 12
+            all_reduce_unidirectional_ring_pp:
+              x-field-uid: 13
+            all_reduce_bidirectional_ring_pp:
+              x-field-uid: 14
+            all_reduce_vector_halving_doubling_pp:
+              x-field-uid: 15
+          enum:
+          - all_to_all_parallel
+          - all_to_all_pxn
+          - all_reduce_unidirectional_ring
+          - all_reduce_bidirectional_ring
+          - all_reduce_vector_halving_doubling
+          - all_reduce_double_binary_tree
+          - all_gather_ring
+          - reduce_scatter_ring
+          - broadcast_parallel
+          - gather_parallel
+          - all_to_all_parallel_pp
+          - all_to_all_pxn_pp
+          - all_reduce_unidirectional_ring_pp
+          - all_reduce_bidirectional_ring_pp
+          - all_reduce_vector_halving_doubling_pp
+        custom:
+          type: string
+          description: |-
+            A path of format package.module.classname to a class that inherits from keys_ai_ml_chakra.Expander. Active when algorithm_category is custom.
+          x-field-uid: 3
+        flow_control_config:
+          $ref: '#/components/schemas/FlowControl'
+          description: |-
+            Configuration for the flow control mechanism used by this algorithm.
+          x-field-uid: 4
+    FlowControl:
+      description: |-
+        Flow control mechanism configuration. Receiver grants credits to sender to control data flow.
+      type: object
+      properties:
+        enable_flow_control:
+          type: boolean
+          default: false
+          description: |-
+            Enable flow control. Default false.
+          x-field-uid: 1
+        max_inflight_credits:
+          type: integer
+          default: 4
+          minimum: 1
+          maximum: 8
+          description: |-
+            Maximum number of credits allowed in flight.
+          x-field-uid: 2
+        credit_distribution:
+          type: string
+          default: all_streams
+          description: |-
+            Determines how credits are distributed across streams. all_streams: one credit unblocks all streams simultaneously. single_stream: one credit unblocks one stream at a time. Default is all_streams.
+          x-field-uid: 3
+          x-enum:
+            all_streams:
+              x-field-uid: 1
+            single_stream:
+              x-field-uid: 2
+          enum:
+          - all_streams
+          - single_stream
+        delay_type:
+          type: string
+          default: manual
+          description: |-
+            Selects whether compute delay is manually configured or automatically derived.
+          x-field-uid: 4
+          x-enum:
+            manual:
+              x-field-uid: 1
+            automatic:
+              x-field-uid: 2
+          enum:
+          - manual
+          - automatic
+        manual:
+          $ref: '#/components/schemas/ManualComputeDelay'
+          description: |-
+            Manual compute delay configuration. Active when delay_type is manual.
+          x-field-uid: 5
+        automatic:
+          $ref: '#/components/schemas/AutomaticComputeDelay'
+          description: |-
+            Automatic compute delay configuration. Active when delay_type is automatic.
+          x-field-uid: 6
+    ManualComputeDelay:
+      description: |-
+        Manual compute delay configuration for flow control.
+      type: object
+      properties:
+        compute_delay:
+          type: integer
+          default: 0
+          minimum: 0
+          maximum: 5000
+          description: |-
+            Delay between data reception and credit transmission in microseconds.
+          x-field-uid: 1
+    AutomaticComputeDelay:
+      description: |-
+        Automatic compute delay configuration for flow control. GPU type determines the compute delay function used.
+      type: object
+      properties:
+        gpu_type:
+          type: string
+          default: a100
+          description: |-
+            GPU type used to derive the default compute delay. Default is a100.
+          x-field-uid: 1
+          x-enum:
+            a100:
+              x-field-uid: 1
+            h100:
+              x-field-uid: 2
+          enum:
+          - a100
+          - h100
+    ChannelsTopology:
+      description: |-
+        Topology defining all communication channels in the system.
+      type: object
+      properties:
+        channels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Channel'
+          description: |-
+            List of all communication channels configured in the topology.
+          x-field-uid: 1
+    Channel:
+      description: |-
+        A communication channel defining how collective operations are executed across ranks.
+      type: object
+      properties:
+        algorithm_type:
+          type: string
+          description: |-
+            The communication algorithm used for collective operations on this channel. _pp suffix variants are MSCCL++ implementations.
+          x-field-uid: 1
+          x-enum:
+            all_to_all_parallel:
+              x-field-uid: 1
+            all_to_all_pxn:
+              x-field-uid: 2
+            all_reduce_unidirectional_ring:
+              x-field-uid: 3
+            all_reduce_bidirectional_ring:
+              x-field-uid: 4
+            all_reduce_vector_halving_doubling:
+              x-field-uid: 5
+            all_reduce_double_binary_tree:
+              x-field-uid: 6
+            all_gather_ring:
+              x-field-uid: 7
+            reduce_scatter_ring:
+              x-field-uid: 8
+            broadcast_parallel:
+              x-field-uid: 9
+            gather_parallel:
+              x-field-uid: 10
+            all_to_all_parallel_pp:
+              x-field-uid: 11
+            all_to_all_pxn_pp:
+              x-field-uid: 12
+            all_reduce_unidirectional_ring_pp:
+              x-field-uid: 13
+            all_reduce_bidirectional_ring_pp:
+              x-field-uid: 14
+            all_reduce_vector_halving_doubling_pp:
+              x-field-uid: 15
+          enum:
+          - all_to_all_parallel
+          - all_to_all_pxn
+          - all_reduce_unidirectional_ring
+          - all_reduce_bidirectional_ring
+          - all_reduce_vector_halving_doubling
+          - all_reduce_double_binary_tree
+          - all_gather_ring
+          - reduce_scatter_ring
+          - broadcast_parallel
+          - gather_parallel
+          - all_to_all_parallel_pp
+          - all_to_all_pxn_pp
+          - all_reduce_unidirectional_ring_pp
+          - all_reduce_bidirectional_ring_pp
+          - all_reduce_vector_halving_doubling_pp
+        rank_distribution:
+          $ref: '#/components/schemas/RankDistribution'
+          description: |-
+            How ranks are mapped and ordered within this channel.
+          x-field-uid: 2
+    RankDistribution:
+      description: |-
+        Defines how ranks are distributed across a communication channel.
+      type: object
+      properties:
+        distribution:
+          type: string
+          description: |-
+            The rank ordering scheme. ascending: 0, 1, 2, 3, ... descending: N, N-1, N-2, ... interleaved: 0, N/2, 1, N/2+1, ... custom: explicit order specified in custom_order.
+          x-field-uid: 1
+          x-enum:
+            ascending:
+              x-field-uid: 1
+            descending:
+              x-field-uid: 2
+            interleaved:
+              x-field-uid: 3
+            custom:
+              x-field-uid: 4
+          enum:
+          - ascending
+          - descending
+          - interleaved
+          - custom
+        custom_order:
+          type: array
+          items:
+            type: integer
+          description: |-
+            Explicit list of rank IDs in the desired order. Only applicable when distribution is custom.
+          x-field-uid: 2
+    Impairments:
+      description: |-
+        Container for configuring network impairments applied during a trial.
+      type: object
+      properties:
+        packet_drop:
+          $ref: '#/components/schemas/PacketDrop'
+          description: |-
+            Packet drop impairment configuration.
+          x-field-uid: 1
+        packet_reorder:
+          $ref: '#/components/schemas/PacketReorder'
+          description: |-
+            Packet reorder impairment configuration.
+          x-field-uid: 2
+    PacketDrop:
+      description: |-
+        Simulates packet loss by dropping packets matching any of the specified conditions.
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          default: false
+          description: |-
+            Whether packet drop impairment is active. Default false.
+          x-field-uid: 1
+        match_conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchConditions'
+          description: |-
+            List of match condition sets (OR logic). Packets matching any set are dropped.
+          x-field-uid: 2
+        skip_count:
+          type: integer
+          default: 0
+          minimum: 0
+          maximum: 16777215
+          description: |-
+            Number of matching packets to skip before dropping.
+          x-field-uid: 3
+        drop_count:
+          type: integer
+          default: 1
+          minimum: 1
+          maximum: 16777215
+          description: |-
+            Number of consecutive packets to drop after skip_count.
+          x-field-uid: 4
+    PacketReorder:
+      description: |-
+        Simulates out-of-order packet delivery for testing reordering resilience.
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          default: false
+          description: |-
+            Whether packet reorder impairment is active. Default false.
+          x-field-uid: 1
+        match_conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchConditions'
+          description: |-
+            List of match condition sets (OR logic).
+          x-field-uid: 2
+        skip_count:
+          type: integer
+          default: 0
+          minimum: 0
+          maximum: 16777215
+          description: |-
+            Number of matching packets to skip before reordering.
+          x-field-uid: 3
+        reorder_count:
+          type: integer
+          default: 1
+          minimum: 1
+          maximum: 511
+          description: |-
+            Number of packets to send out-of-order. reorder_count + hold_count must be less than 512.
+          x-field-uid: 4
+        hold_count:
+          type: integer
+          default: 1
+          minimum: 1
+          maximum: 511
+          description: |-
+            Number of packets to delay before sending the reordered packets.
+          x-field-uid: 5
+    MatchConditions:
+      description: |-
+        A set of match conditions — all are required (ANDed).
+      type: object
+      properties:
+        location:
+          type: string
+          default: src
+          description: |-
+            Whether to impair at the source (sender) or destination (receiver) side. Default is src.
+          x-field-uid: 1
+          x-enum:
+            src:
+              x-field-uid: 1
+            dst:
+              x-field-uid: 2
+          enum:
+          - src
+          - dst
+        collective:
+          $ref: '#/components/schemas/CollectiveMatchConditions'
+          description: |-
+            Collective communication flow to match.
+          x-field-uid: 2
+        packet:
+          type: array
+          items:
+            $ref: '#/components/schemas/PacketConditions'
+          description: |-
+            Packet-level conditions to match.
+          x-field-uid: 3
+    CollectiveMatchConditions:
+      description: |-
+        Match conditions for a collective communication flow between two NICs.
+      type: object
+      properties:
+        src_nic:
+          $ref: '#/components/schemas/InfraRef'
+          description: |-
+            Reference to the source network interface card.
+          x-field-uid: 1
+        dst_nic:
+          $ref: '#/components/schemas/InfraRef'
+          description: |-
+            Reference to the destination network interface card.
+          x-field-uid: 2
+        flow_index:
+          type: integer
+          default: 0
+          minimum: 0
+          maximum: 16777215
+          description: |-
+            Index identifying a specific flow between source and destination.
+          x-field-uid: 3
+    PacketConditions:
+      description: |-
+        Packet-level match conditions. Supports different protocol-specific criteria.
+      type: object
+      properties:
+        packet_conditions_type:
+          type: string
+          description: |-
+            The type of packet conditions to match.
+          x-field-uid: 1
+          x-enum:
+            rdma:
+              x-field-uid: 1
+          enum:
+          - rdma
+        rdma:
+          $ref: '#/components/schemas/RdmaMatchConditions'
+          description: |-
+            RDMA-specific match conditions. Active when packet_conditions_type is rdma.
+          x-field-uid: 2
+    RdmaMatchConditions:
+      description: |-
+        Match conditions for RDMA packets. Allows matching on multiple opcodes simultaneously.
+      type: object
+      properties:
+        opcode_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/RdmaOpcodeMatch'
+          description: |-
+            List of RDMA opcodes to match (OR logic).
+          x-field-uid: 1
+    RdmaOpcodeMatch:
+      description: |-
+        Matches a specific RDMA packet opcode type.
+      type: object
+      properties:
+        value:
+          type: string
+          default: source_any
+          description: |-
+            The RDMA opcode value to match. first: RDMA Write/Send first packet. middle: RDMA Write/Send middle packet. last: RDMA Write/Send last packet. source_any: any packet sent by source. ack: acknowledgment from destination. nack: negative acknowledgment from destination. destination_any: any packet sent by destination. Default is source_any.
+          x-field-uid: 1
+          x-enum:
+            first:
+              x-field-uid: 1
+            middle:
+              x-field-uid: 2
+            last:
+              x-field-uid: 3
+            source_any:
+              x-field-uid: 4
+            ack:
+              x-field-uid: 5
+            nack:
+              x-field-uid: 6
+            destination_any:
+              x-field-uid: 7
+          enum:
+          - first
+          - middle
+          - last
+          - source_any
+          - ack
+          - nack
+          - destination_any
+    InfraRef:
+      description: |-
+        A reference to a logical infrastructure element.
+      type: object
+      properties:
+        device_instance_name:
+          type: string
+          description: |-
+            Name of the logical infrastructure device (e.g. the value set for dse_infra.GenericHost.name).
+          x-field-uid: 1
+        device_index:
+          type: integer
+          description: |-
+            Zero-based device index.
+          x-field-uid: 2
+        component_name:
+          type: string
+          description: |-
+            Name of the logical infrastructure component.
+          x-field-uid: 3
+        component_index:
+          type: integer
+          description: |-
+            Zero-based component index.
+          x-field-uid: 4
+    CustomBinding:
+      description: |-
+        Maps ranks to logical NPUs, configures NIC settings, and assigns physical test resources.
+      type: object
+      properties:
+        rank_bindings:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankBinding'
+          description: |-
+            List of bindings that map each rank to a specific logical NPU and its available NICs.
+          x-field-uid: 1
+        nic_bindings:
+          type: array
+          items:
+            $ref: '#/components/schemas/NicBinding'
+          description: |-
+            List of NIC configuration bindings specifying settings and associated physical bindings.
+          x-field-uid: 2
+        physical_bindings:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhysicalBinding'
+          description: |-
+            List of bindings that associate logical infrastructure elements with physical test resources.
+          x-field-uid: 3
+    RankBinding:
+      description: |-
+        Assigns a rank to a logical NPU and lists the NICs available to that NPU.
+      type: object
+      properties:
+        infra_ref:
+          $ref: '#/components/schemas/InfraRef'
+          description: |-
+            Reference to the NPU used by this rank.
+          x-field-uid: 1
+        rank_id:
+          type: integer
+          description: |-
+            The unique identifier for this rank in the distributed workload.
+          x-field-uid: 2
+        nic_refs:
+          type: array
+          items:
+            $ref: '#/components/schemas/InfraRef'
+          description: |-
+            List of NICs available to this NPU (in the same host).
+          x-field-uid: 3
+    NicBinding:
+      description: |-
+        Binds logical NIC settings to a NIC defined in the Chakra infrastructure.
+      type: object
+      properties:
+        infra_ref:
+          $ref: '#/components/schemas/InfraRef'
+          description: |-
+            Reference to a NIC defined in the Chakra infrastructure.
+          x-field-uid: 1
+        nic_settings:
+          $ref: '#/components/schemas/NicSettings'
+          description: |-
+            NIC configuration settings. Auto-populated but can be overridden by the user.
+          x-field-uid: 2
+        associated_physical_bindings:
+          type: array
+          items:
+            $ref: '#/components/schemas/InfraRef'
+          description: |-
+            Flows from this NIC may be generated by test ports from any of these associated physical bindings.
+          x-field-uid: 3
+    PhysicalBinding:
+      description: |-
+        Binds a logical infrastructure element to a physical test resource, specifying platform type and per-platform configuration.
+      type: object
+      properties:
+        infra_ref:
+          $ref: '#/components/schemas/InfraRef'
+          description: |-
+            Reference to the logical infrastructure element that the physical resource represents.
+          x-field-uid: 1
+        platform_name:
+          type: string
+          description: |-
+            The platform name for this physical binding. When set, takes precedence over any platform assigned to the binding's infrastructure region via PlatformConfig. leave blank to defer to the region assignment.
+          x-field-uid: 2
+        config:
+          $ref: '#/components/schemas/PhysicalBindingConfig'
+          description: |-
+            Per-platform configuration for this physical binding.
+          x-field-uid: 3
+    PhysicalBindingConfig:
+      description: |-
+        Per-binding platform configuration. The active sub-object is determined by PhysicalBinding.platform. Multiple sub-objects may be present but only the one matching the binding's platform is used.
+      type: object
+      properties:
+        custom_settings:
+          $ref: '#/components/schemas/StringMap'
+          description: |-
+            Generic key/value settings for this physical binding. May be used by all platforms for testing purposes. For platform=custom, this is the primary binding configuration — pass all vendor-specific binding parameters here.
+          x-field-uid: 1
+        keysight_nccl_test:
+          $ref: '#/components/schemas/BindingKeysightNcclTestConfig'
+          description: |-
+            Binding settings specific to the Keysight NCCL test platform.
+          x-field-uid: 2
+        keysight_sw:
+          $ref: '#/components/schemas/BindingKeysightSwConfig'
+          description: |-
+            Binding settings specific to the Keysight software agent platform.
+          x-field-uid: 3
+        keysight_hw:
+          $ref: '#/components/schemas/BindingKeysightHwConfig'
+          description: |-
+            Binding settings specific to the Keysight hardware platform.
+          x-field-uid: 4
+    BindingKeysightHwConfig:
+      description: |-
+        Physical binding settings for the Keysight hardware platform.
+      type: object
+      properties:
+        chassis_location:
+          $ref: '#/components/schemas/ChassisInfo'
+          description: |-
+            Chassis location for this binding.
+          x-field-uid: 1
+        layer1:
+          $ref: '#/components/schemas/Layer1'
+          description: |-
+            Layer 1 physical settings such as link speed, duplex mode, and FEC.
+          x-field-uid: 2
+        capture:
+          $ref: '#/components/schemas/PacketCapture'
+          description: |-
+            PRIVATE: Packet capture settings.
+          x-field-uid: 3
+    BindingKeysightSwConfig:
+      description: |-
+        Physical binding settings for the Keysight software agent platform.
+      type: object
+      properties:
+        server_location:
+          $ref: '#/components/schemas/ServerInfo'
+          description: |-
+            Server location for this binding.
+          x-field-uid: 1
+        layer1:
+          $ref: '#/components/schemas/Layer1'
+          description: |-
+            Layer 1 physical settings such as link speed, duplex mode, and FEC.
+          x-field-uid: 2
+        capture:
+          $ref: '#/components/schemas/PacketCapture'
+          description: |-
+            PRIVATE: Packet capture settings.
+          x-field-uid: 3
+    BindingKeysightNcclTestConfig:
+      description: |-
+        Physical binding settings for the Keysight NCCL test platform.
+      type: object
+      properties:
+        server_location:
+          $ref: '#/components/schemas/ServerInfo'
+          description: |-
+            Server location for this binding.
+          x-field-uid: 1
+        layer1:
+          $ref: '#/components/schemas/Layer1'
+          description: |-
+            Layer 1 physical settings such as link speed, duplex mode, and FEC.
+          x-field-uid: 2
+        capture:
+          $ref: '#/components/schemas/PacketCapture'
+          description: |-
+            PRIVATE: Packet capture settings.
+          x-field-uid: 3
+    ChassisInfo:
+      description: |-
+        Information about a hardware appliance with a management interface and network ports
+      type: object
+      properties:
+        address:
+          type: string
+          description: |-
+            Chassis IP address or FQDN.
+          x-field-uid: 1
+        port:
+          type: string
+          description: |-
+            Chassis port. Format: <front-panel-port> or <front-panel-port>.<fanout>. Examples: '1' or '1.4'. Default is '1'.
+          x-field-uid: 2
+    ServerInfo:
+      description: |-
+        Information about a server used for emulation.
+      type: object
+      properties:
+        address:
+          type: string
+          description: |-
+            Server IP address or FQDN.
+          x-field-uid: 1
+        nic_interface:
+          type: string
+          description: |-
+            NIC interface name on the server.
+          x-field-uid: 2
+    NicSettings:
+      description: |-
+        Network Interface Card configuration settings.
+      type: object
+      properties:
+        ethernet_mtu:
+          type: integer
+          default: 8192
+          minimum: 68
+          maximum: 14000
+          description: |-
+            Ethernet Maximum Transmission Unit in bytes.
+          x-field-uid: 1
+        ip_addressing:
+          $ref: '#/components/schemas/NicIpAddressing'
+          description: |-
+            IP addressing configuration (IPv4 or IPv6).
+          x-field-uid: 2
+        qos:
+          $ref: '#/components/schemas/Qos'
+          description: |-
+            PRIVATE: Quality of service configuration.
+          x-field-uid: 3
+        congestion_control:
+          $ref: '#/components/schemas/CongestionControl'
+          description: |-
+            Congestion control configuration (ECN, PFC, DCQCN).
+          x-field-uid: 4
+        packet_capture:
+          $ref: '#/components/schemas/PacketCapture'
+          description: |-
+            PRIVATE: Packet capture settings for this NIC.
+          x-field-uid: 5
+        mac_address:
+          type: string
+          default: 00:00:00:00:00:00
+          description: |-
+            MAC address. Default 00:00:00:00:00:00 means auto-assigned.
+          x-field-uid: 6
+        vlan:
+          $ref: '#/components/schemas/Vlan'
+          description: |-
+            VLAN configuration.
+          x-field-uid: 7
+        transport:
+          $ref: '#/components/schemas/NicTransport'
+          description: |-
+            Transport-specific NIC settings.
+          x-field-uid: 8
+    NicIpAddressing:
+      description: |-
+        IP addressing configuration for a NIC — selects between IPv4 and IPv6.
+      type: object
+      properties:
+        ip_version:
+          type: string
+          description: |-
+            Selects the IP addressing mode for this NIC.
+          x-field-uid: 1
+          x-enum:
+            ipv4:
+              x-field-uid: 1
+            ipv6:
+              x-field-uid: 2
+          enum:
+          - ipv4
+          - ipv6
+        ipv4:
+          $ref: '#/components/schemas/Ipv4Addressing'
+          description: |-
+            IPv4 addressing configuration. Active when ip_version is ipv4.
+          x-field-uid: 2
+        ipv6:
+          $ref: '#/components/schemas/Ipv6Addressing'
+          description: |-
+            IPv6 addressing configuration. Active when ip_version is ipv6.
+          x-field-uid: 3
+    NicTransport:
+      description: |-
+        Transport-specific NIC settings.
+      type: object
+      properties:
+        rocev2:
+          $ref: '#/components/schemas/Rocev2TransportSettings'
+          description: |-
+            RoCEv2 transport-specific NIC settings.
+          x-field-uid: 1
+    Ipv4Addressing:
+      description: |-
+        IPv4 addressing configuration for a NIC.
+      type: object
+      properties:
+        ip_address:
+          type: string
+          default: 192.0.2.2
+          description: |-
+            IPv4 address.
+          x-field-uid: 1
+        ip_prefix:
+          type: integer
+          default: 24
+          minimum: 1
+          maximum: 32
+          description: |-
+            IPv4 prefix length.
+          x-field-uid: 2
+        ip_gateway_address:
+          type: string
+          default: 192.0.2.1
+          description: |-
+            Gateway IPv4 address.
+          x-field-uid: 3
+    Ipv6Addressing:
+      description: |-
+        IPv6 addressing configuration for a NIC.
+      type: object
+      properties:
+        ip_address:
+          type: string
+          default: 2001:db8::2
+          description: |-
+            IPv6 address.
+          x-field-uid: 1
+        ip_prefix:
+          type: integer
+          default: 32
+          minimum: 1
+          maximum: 128
+          description: |-
+            IPv6 prefix length.
+          x-field-uid: 2
+        ip_gateway_address:
+          type: string
+          default: 2001:db8::1
+          description: |-
+            Gateway IPv6 address.
+          x-field-uid: 3
+    Vlan:
+      description: |-
+        VLAN configuration.
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          default: false
+          description: |-
+            Enable or disable VLAN.
+          x-field-uid: 1
+        vlan_tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/VlanTag'
+          description: |-
+            List of VLAN tags. Currently one tag is supported.
+          x-field-uid: 2
+    VlanTag:
+      description: |-
+        A single VLAN tag.
+      type: object
+      properties:
+        priority:
+          type: integer
+          default: 0
+          minimum: 0
+          maximum: 7
+          description: |-
+            VLAN priority (802.1p). Default 0.
+          x-field-uid: 1
+        vlan_id:
+          type: integer
+          default: 1
+          minimum: 1
+          maximum: 4094
+          description: |-
+            VLAN ID. Default 1.
+          x-field-uid: 2
+    Rocev2TransportSettings:
+      description: |-
+        RoCEv2 transport-specific NIC settings.
+      type: object
+      properties:
+        ack_dscp:
+          type: integer
+          default: 26
+          minimum: 0
+          maximum: 63
+          description: |-
+            DSCP value for RoCEv2 ACK packets.
+          x-field-uid: 1
+        nack_dscp:
+          type: integer
+          default: 26
+          minimum: 0
+          maximum: 63
+          description: |-
+            DSCP value for RoCEv2 NACK packets.
+          x-field-uid: 2
+        data_dscp:
+          type: integer
+          default: 26
+          minimum: 0
+          maximum: 63
+          description: |-
+            DSCP value for RoCEv2 data packets.
+          x-field-uid: 3
+    CongestionControl:
+      description: |-
+        Congestion control mechanism configuration.
+      type: object
+      properties:
+        ecn:
+          $ref: '#/components/schemas/ExplicitCongestionNotifications'
+          description: |-
+            Explicit Congestion Notification (ECN) configuration.
+          x-field-uid: 1
+        pfc:
+          $ref: '#/components/schemas/PriorityFlowControl'
+          description: |-
+            Priority Flow Control (PFC) configuration.
+          x-field-uid: 2
+        dcqcn_rate_control:
+          $ref: '#/components/schemas/DCQCNRateControl'
+          description: |-
+            Data Center Quantized Congestion Notification (DCQCN) rate control configuration.
+          x-field-uid: 3
+    ExplicitCongestionNotifications:
+      description: |-
+        ECN (Explicit Congestion Notification) configuration.
+      type: object
+      properties:
+        cnp_dscp:
+          type: integer
+          default: 48
+          minimum: 0
+          maximum: 63
+          description: |-
+            DSCP of Congestion Notification Packets (CNP).
+          x-field-uid: 1
+        data_ecn_bits:
+          type: string
+          default: ect1
+          description: |-
+            ECN bits for data packets. disabled: 00 Non-ECT — ECN not supported. ect1: 01 ECT(1) — ECN-capable transport. ect0: 10 ECT(0) — ECN-capable transport (alternate codepoint).
+          x-field-uid: 2
+          x-enum:
+            disabled:
+              x-field-uid: 1
+            ect1:
+              x-field-uid: 2
+            ect0:
+              x-field-uid: 3
+          enum:
+          - disabled
+          - ect1
+          - ect0
+        control_ecn_bits:
+          type: string
+          default: ect1
+          description: |-
+            ECN bits for control packets (e.g. RoCEv2 ACKs). disabled: 00 Non-ECT — ECN not supported. ect1: 01 ECT(1) — ECN-capable transport. ect0: 10 ECT(0) — ECN-capable transport (alternate codepoint).
+          x-field-uid: 3
+          x-enum:
+            disabled:
+              x-field-uid: 1
+            ect1:
+              x-field-uid: 2
+            ect0:
+              x-field-uid: 3
+          enum:
+          - disabled
+          - ect1
+          - ect0
+        cnp_ecn_bits:
+          type: string
+          default: ect1
+          description: |-
+            ECN bits for CNP packets. disabled: 00 Non-ECT — ECN not supported. ect1: 01 ECT(1) — ECN-capable transport. ect0: 10 ECT(0) — ECN-capable transport (alternate codepoint).
+          x-field-uid: 4
+          x-enum:
+            disabled:
+              x-field-uid: 1
+            ect1:
+              x-field-uid: 2
+            ect0:
+              x-field-uid: 3
+          enum:
+          - disabled
+          - ect1
+          - ect0
+    PriorityFlowControl:
+      description: |-
+        Priority Flow Control (PFC) configuration.
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          default: true
+          description: |-
+            Enable or disable Priority Flow Control.
+          x-field-uid: 1
+        priorities:
+          type: array
+          items:
+            type: integer
+            minimum: 0
+            maximum: 7
+          default:
+          - 3
+          description: |-
+            List of priorities (0-7) for which PFC is enabled.
+          x-field-uid: 2
+    DCQCNRateControl:
+      description: |-
+        DCQCN (Data Center Quantized Congestion Notification) rate control settings.
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          default: false
+          description: |-
+            Enable or disable DCQCN. Default false.
+          x-field-uid: 1
+        alpha_factor:
+          type: integer
+          default: 1019
+          minimum: 0
+          maximum: 1023
+          description: |-
+            Factor to update Alpha every update period (fixed point fraction of 2^10).
+          x-field-uid: 2
+        alpha_interval:
+          type: integer
+          default: 21
+          minimum: 1
+          maximum: 131071
+          description: |-
+            Alpha update period in microseconds.
+          x-field-uid: 3
+        initial_alpha:
+          type: integer
+          default: 1023
+          minimum: 1
+          maximum: 1023
+          description: |-
+            Initial Alpha value.
+          x-field-uid: 4
+        rate_after_first_cnp:
+          type: integer
+          default: 10000
+          minimum: 1
+          maximum: 1600000
+          description: |-
+            Current and target rate limit set after first CNP in Mbps.
+          x-field-uid: 5
+        rate_decrement_factor:
+          type: number
+          default: 50
+          minimum: 0
+          maximum: 100
+          description: |-
+            Maximal ratio of rate decrease in a single event (percentage).
+          x-field-uid: 6
+        min_rate_limit:
+          type: integer
+          default: 1
+          minimum: 1
+          maximum: 1600000
+          description: |-
+            Minimal rate limit of the QP in Mbps.
+          x-field-uid: 7
+        rate_decrement_coefficient:
+          type: integer
+          default: 11
+          minimum: 10
+          maximum: 11
+          description: |-
+            The coefficient between Alpha and the rate reduction factor.
+          x-field-uid: 8
+        rate_decrement_interval:
+          type: integer
+          default: 21
+          minimum: 1
+          maximum: 2147483647
+          description: |-
+            Minimum time period between rate reductions in microseconds.
+          x-field-uid: 9
+        clamp_target_rate:
+          type: boolean
+          default: false
+          description: |-
+            When a CNP is processed, update the target rate to the current rate. Default false.
+          x-field-uid: 10
+        rate_increment_interval:
+          type: integer
+          default: 300
+          minimum: 1
+          maximum: 131071
+          description: |-
+            Time period between rate increase events in microseconds.
+          x-field-uid: 11
+        rate_increment_byte_counter:
+          type: integer
+          default: 32767
+          minimum: 1
+          maximum: 32767
+          description: |-
+            Sent bytes counter between rate increase events (unit: 64B).
+          x-field-uid: 12
+        rate_increment_threshold:
+          type: integer
+          default: 1
+          minimum: 1
+          maximum: 31
+          description: |-
+            Threshold of rate increase events for moving to next rate increase phase.
+          x-field-uid: 13
+        additive_rate_increment:
+          type: integer
+          default: 5
+          minimum: 1
+          maximum: 1600000
+          description: |-
+            Rate increase value in the Additive Increase phase in Mbps.
+          x-field-uid: 14
+        hyper_rate_increment:
+          type: integer
+          default: 50
+          minimum: 1
+          maximum: 1600000
+          description: |-
+            Rate increase value in the Hyper Increase phase in Mbps.
+          x-field-uid: 15
+        time_between_cnps:
+          type: integer
+          default: 4
+          minimum: 1
+          maximum: 255
+          description: |-
+            Minimal time between two consecutive CNPs sent in microseconds.
+          x-field-uid: 16
+    Qos:
+      description: |-
+        PRIVATE: Quality of Service configuration.
+      type: object
+      properties:
+        priority_trust_mode:
+          type: string
+          description: |-
+            PRIVATE: Priority trust mode. dscp = trust based on Differentiated Services Code Point.
+          x-field-uid: 1
+          x-enum:
+            dscp:
+              x-field-uid: 1
+          enum:
+          - dscp
+        map_dscp_to_prio:
+          $ref: '#/components/schemas/IntegerMap'
+          description: |-
+            PRIVATE: DSCP to priority mapping. Keys and values are integers.
+          x-field-uid: 2
+        map_prio_to_traffic_class:
+          $ref: '#/components/schemas/IntegerMap'
+          description: |-
+            PRIVATE: Priority to traffic class mapping. Keys and values are integers.
+          x-field-uid: 3
+    PacketCapture:
+      description: |-
+        PRIVATE: Packet capture configuration.
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          default: false
+          description: |-
+            PRIVATE: Enable or disable packet capture.
+          x-field-uid: 1
+        capture_max_file_size:
+          type: integer
+          default: 10485760
+          minimum: 0
+          maximum: 268435456
+          description: |-
+            PRIVATE: Maximum capture file size in bytes. Default 10485760 (10 MiB).
+          x-field-uid: 2
+        buffer_full_action:
+          type: string
+          default: override
+          description: |-
+            PRIVATE: Action when capture buffer is full. override: overwrite current buffer and save its contents. stop: stop capture and dump data to file. Default is override.
+          x-field-uid: 3
+          x-enum:
+            override:
+              x-field-uid: 1
+            stop:
+              x-field-uid: 2
+          enum:
+          - override
+          - stop
+        packet_slice_size:
+          type: integer
+          default: 80
+          minimum: 0
+          maximum: 262144
+          description: |-
+            PRIVATE: Size of each packet slice in bytes. 0 means capture entire packet.
+          x-field-uid: 4
+    PlatformRegion:
+      description: |-
+        Assigns a platform to a region within the infrastructure.
+      type: object
+      properties:
+        region:
+          $ref: '#/components/schemas/InfraRegion'
+          description: |-
+            The infrastructure region to which a platform is assigned.
+          x-field-uid: 1
+        platform:
+          type: string
+          description: |-
+            The name of the platform assigned to this infrastructure region.
+          x-field-uid: 2
+    InfraRegion:
+      description: |-
+        Defines a region within the infrastructure by specifying boundary components.
+      type: object
+      properties:
+        boundary_refs:
+          type: array
+          items:
+            $ref: '#/components/schemas/InfraRef'
+          description: |-
+            Components that mark the boundary of this region within the infrastructure.
+          x-field-uid: 1
+    GroupSpec:
+      description: |-
+        Specification for creating a set of named process groups. The server uses these to derive the appropriate process groups. Example: prefix="DP", group_count=4 produces groups DP1, DP2, DP3, DP4.
+      type: object
+      properties:
+        prefix:
+          type: string
+          description: |-
+            Prefix for the process groups (e.g., "DP" produces groups named DP1, DP2, ..., DPn).
+          x-field-uid: 1
+        group_count:
+          type: integer
+          minimum: 1
+          description: |-
+            Total number of process groups to create with this prefix.
+          x-field-uid: 2
+        group_size:
+          type: integer
+          minimum: 1
+          description: |-
+            Number of ranks per process group. If omitted, derived from the total number of ranks divided by group_count.
+          x-field-uid: 3
+        allocation_strategy:
+          type: string
+          default: sequential
+          description: |-
+            Strategy for allocating NPUs to the derived process groups.
+          x-field-uid: 4
+          x-enum:
+            sequential:
+              x-field-uid: 1
+            round_robin:
+              x-field-uid: 2
+            custom:
+              x-field-uid: 3
+          enum:
+          - sequential
+          - round_robin
+          - custom
+        sequential:
+          $ref: '#/components/schemas/SequentialStrategy'
+          description: |-
+            Sequential allocation strategy configuration. Active when allocation_strategy is sequential.
+          x-field-uid: 5
+        round_robin:
+          $ref: '#/components/schemas/RoundRobinStrategy'
+          description: |-
+            Round-robin allocation strategy configuration. Active when allocation_strategy is round_robin.
+          x-field-uid: 6
+        custom_strategy:
+          $ref: '#/components/schemas/CustomStrategy'
+          description: |-
+            Custom allocation strategy configuration. Active when allocation_strategy is custom.
+          x-field-uid: 7
+    SequentialStrategy:
+      description: |-
+        Sequential NPU allocation strategy. Allocates NPUs sequentially from the ordered list of available NPUs.
+      type: object
+    RoundRobinStrategy:
+      description: |-
+        Round-robin NPU allocation strategy. Allocates NPUs in a round-robin fashion across process groups.
+      type: object
+      properties:
+        step:
+          type: integer
+          default: 1
+          description: |-
+            Round-robin step size.
+          x-field-uid: 1
+    CustomStrategy:
+      description: |-
+        Custom allocation strategy configuration.
+      type: object
+    InfrastructureProfile:
+      description: |-
+        Logical infrastructure profile describing the emulated infrastructure topology.
+      type: object
+      properties:
+        name:
+          type: string
+          description: |-
+            Profile name.
+          x-field-uid: 1
+        id:
+          type: string
+          description: |-
+            System-assigned globally unique profile ID.
+          x-field-uid: 2
+        infrastructure:
+          $ref: '#/components/schemas/InfrastructureConfig'
+          description: |-
+            The infrastructure configuration for this profile.
+          x-field-uid: 3
+    InfrastructureConfig:
+      description: |-
+        Infrastructure configuration comprising hosts and the network fabric.
+      type: object
+      properties:
+        host:
+          $ref: '#/components/schemas/InfrastructureHost'
+          description: |-
+            Host configuration for the infrastructure.
+          x-field-uid: 1
+        fabric:
+          $ref: '#/components/schemas/InfrastructureFabric'
+          description: |-
+            Fabric topology for the infrastructure.
+          x-field-uid: 2
+    InfrastructureHost:
+      description: |-
+        High-level host specification for the infrastructure.
+      type: object
+      properties:
+        count:
+          type: integer
+          default: 4
+          minimum: 1
+          maximum: 8192
+          description: |-
+            Number of hosts in the fabric.
+          x-field-uid: 1
+        host_type:
+          type: string
+          default: generic
+          description: |-
+            The host type. Default is generic.
+          x-field-uid: 2
+          x-enum:
+            generic:
+              x-field-uid: 1
+            rackplane:
+              x-field-uid: 2
+          enum:
+          - generic
+          - rackplane
+        generic:
+          $ref: '#/components/schemas/GenericHost'
+          description: |-
+            Generic host configuration. Active when host_type is generic.
+          x-field-uid: 3
+        rackplane:
+          $ref: '#/components/schemas/RackPlaneHost'
+          description: |-
+            Rack-plane host configuration. Active when host_type is rackplane. Intended for use with a rackplane fabric topology.
+          x-field-uid: 4
+        use_npu_interconnect:
+          type: boolean
+          default: false
+          description: |-
+            Emulate data transfer over NPU-to-NPU links within each host. When true, data transfers between interconnected ranks within a host are emulated.
+          x-field-uid: 5
+    GenericHost:
+      description: |-
+        Generic host builder parameters. Generic hosts have a 1:1 ratio of NICs and NPUs.
+      type: object
+      properties:
+        name:
+          type: string
+          description: |-
+            The name of this generic host instance.
+          x-field-uid: 1
+        npu_count:
+          type: integer
+          default: 1
+          minimum: 1
+          maximum: 8
+          description: |-
+            Number of Neural Processing Units (NPUs) in the host.
+          x-field-uid: 2
+        npu_interconnect_bandwidth_gbps:
+          type: integer
+          default: 1600
+          minimum: 0
+          description: |-
+            NPU interconnect bandwidth within the host in Gbps. A value of 0 means no NPU-to-NPU interconnect within the host. If non-zero, each NPU within the host is interconnected via a generic link attached to a single generic switch.
+          x-field-uid: 3
+    InfrastructureFabric:
+      description: |-
+        Describes the overall fabric topology.
+      type: object
+      properties:
+        fabric_type:
+          type: string
+          default: blackbox
+          description: |-
+            The type of fabric topology. Default is blackbox.
+          x-field-uid: 1
+          x-enum:
+            blackbox:
+              x-field-uid: 1
+            rackplane:
+              x-field-uid: 2
+          enum:
+          - blackbox
+          - rackplane
+        blackbox:
+          $ref: '#/components/schemas/BlackboxFabric'
+          description: |-
+            Non-detailed generic fabric where internal topology is not modeled. Active when fabric_type is blackbox.
+          x-field-uid: 2
+        rackplane:
+          $ref: '#/components/schemas/RackPlaneFabric'
+          description: |-
+            Multi-plane rack fabric topology. Active when fabric_type is rackplane.
+          x-field-uid: 3
+    RackPlaneHost:
+      description: |-
+        Host type intended for use with a rackplane fabric topology. Each host connects to each fabric plane with dedicated scale-up NICs.
+      type: object
+      properties:
+        name:
+          type: string
+          description: |-
+            The name of this rack-plane host instance.
+          x-field-uid: 1
+        npu_count:
+          type: integer
+          default: 1
+          minimum: 1
+          maximum: 8
+          description: |-
+            Number of NPUs per host.
+          x-field-uid: 2
+        scale_up_nic_count:
+          type: integer
+          default: 4
+          minimum: 1
+          maximum: 64
+          description: |-
+            Number of NICs connected to the scale-up network per host.
+          x-field-uid: 3
+        scale_out_nic_count:
+          type: integer
+          default: 0
+          minimum: 0
+          maximum: 64
+          description: |-
+            Number of NICs connected to the scale-out network per host.
+          x-field-uid: 4
+    RackPlaneFabric:
+      description: |-
+        Multi-plane rack fabric topology. The number of rack switches for intra-rack communication is driven by RackPlaneHost.scale_up_nic_count. The number of scale-out switches for inter-rack communication is driven by rack_count, RackPlaneHost.scale_out_nic_count, and hosts_per_rack.
+      type: object
+      properties:
+        rack_count:
+          type: integer
+          default: 1
+          minimum: 1
+          maximum: 1024
+          description: |-
+            Number of racks in the fabric.
+          x-field-uid: 1
+        hosts_per_rack:
+          type: integer
+          default: 1
+          minimum: 1
+          maximum: 1024
+          description: |-
+            Number of hosts per rack.
+          x-field-uid: 2
+        scale_out_switch_speed:
+          type: string
+          default: speed_800g
+          description: |-
+            Ethernet speed for inter-rack communication via scale-out switches. Default is speed_800g. speed_100g: 100 Gigabit Ethernet. speed_200g: 200 Gigabit Ethernet. speed_400g: 400 Gigabit Ethernet. speed_800g: 800 Gigabit Ethernet.
+          x-field-uid: 3
+          x-enum:
+            speed_100g:
+              x-field-uid: 1
+            speed_200g:
+              x-field-uid: 2
+            speed_400g:
+              x-field-uid: 3
+            speed_800g:
+              x-field-uid: 4
+          enum:
+          - speed_100g
+          - speed_200g
+          - speed_400g
+          - speed_800g
+        scale_up_switch_speed:
+          type: string
+          default: speed_800g
+          description: |-
+            Ethernet speed for intra-rack communication on the scale-up network. Default is speed_800g. speed_100g: 100 Gigabit Ethernet. speed_200g: 200 Gigabit Ethernet. speed_400g: 400 Gigabit Ethernet. speed_800g: 800 Gigabit Ethernet.
+          x-field-uid: 4
+          x-enum:
+            speed_100g:
+              x-field-uid: 1
+            speed_200g:
+              x-field-uid: 2
+            speed_400g:
+              x-field-uid: 3
+            speed_800g:
+              x-field-uid: 4
+          enum:
+          - speed_100g
+          - speed_200g
+          - speed_400g
+          - speed_800g
+    BlackboxFabric:
+      description: |-
+        A fabric where the internal topology is not modeled.
+      type: object
+      properties:
+        name:
+          type: string
+          description: |-
+            Fabric name.
+          x-field-uid: 1
+    StringMap:
+      description: |-
+        A map of string keys to string values.
+      type: object
+      additionalProperties:
+        type: string
+    IntegerMap:
+      description: |-
+        A map of string keys to integer values.
+      type: object
+      additionalProperties:
+        type: integer
+    AiWorkload:
+      description: |-
+        AiWorkloadConfig contains all the information about an AiWorkload configuration to apply before running
+      type: object
+      properties:
+        info:
+          $ref: '#/components/schemas/AiWorkloadInfo'
+          description: |-
+            Read-only info about the workload, e.g. server version.
+          x-field-uid: 1
+        app_type:
+          type: string
+          default: collective_benchmark
+          description: |-
+            Selects the workload type for the trial. Default is collective_benchmark.
+          x-field-uid: 2
+          x-enum:
+            collective_benchmark:
+              x-field-uid: 1
+            workload_emulation:
+              x-field-uid: 2
+          enum:
+          - collective_benchmark
+          - workload_emulation
+        collective_benchmark:
+          $ref: '#/components/schemas/CcbConfig'
+          description: |-
+            Collective Communication Benchmark (CCB) configuration. Active when app_type is collective_benchmark.
+          x-field-uid: 3
+        workload_emulation:
+          $ref: '#/components/schemas/WorkloadEmulationConfig'
+          description: |-
+            Workload Emulation (WE) configuration. Active when app_type is workload_emulation.
+          x-field-uid: 4
+        impairments:
+          $ref: '#/components/schemas/Impairments'
+          description: |-
+            Network impairment configuration applied during the trial.
+          x-field-uid: 5
+        bindings:
+          $ref: '#/components/schemas/TrialBindings'
+          description: |-
+            Resource bindings used for the trial run.
+          x-field-uid: 6
+        platform:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlatformConfig'
+            description: |-
+              Platform configuration for the trial run, including the default platform and per-platform typed settings. Multiple platforms may be configured simultaneously to support trials that span more than one platform type.
+          x-field-uid: 7
+        result_info_prefill:
+          $ref: '#/components/schemas/ResultInfo'
+          description: |-
+            General information about the Trial Result to populate the Trial Result with. These fields in the Trial Result itself can be further edited after the test.
+          x-field-uid: 8
+    AiWorkloadInfo:
+      description: |-
+        Information about the AI Workload (AI Data Center Builder) application including version, status, and build details.
+      properties:
+        version:
+          description: |-
+            The version of the AI Workload application.
+            Semver (semantic versioning) formatted version of containing object.
+          x-field-uid: 1
+          type: string
+          format: semantic-version
+        build_date:
+          type: string
+          format: date-time
+          description: |-
+            The date and time when the AI Workload application was built.
+          x-field-uid: 2
+        config_version:
+          description: |-
+            The version of the trial config.
+            Semver (semantic versioning) formatted version of containing object.
+          x-field-uid: 3
+          type: string
+          format: semantic-version
     PerPort.Options:
       description: |-
         Port specific configurations.
@@ -19819,11 +21742,14 @@ components:
               x-field-uid: 2
             traffic:
               x-field-uid: 3
+            ai_workload:
+              x-field-uid: 4
           x-field-uid: 1
           enum:
           - port
           - protocol
           - traffic
+          - ai_workload
         port:
           $ref: '#/components/schemas/State.Port'
           x-field-uid: 2
@@ -19833,6 +21759,9 @@ components:
         traffic:
           $ref: '#/components/schemas/State.Traffic'
           x-field-uid: 4
+        ai_workload:
+          $ref: '#/components/schemas/State.AiWorkload'
+          x-field-uid: 6
     State.Port:
       description: |-
         States associated with configured ports.
@@ -19932,6 +21861,23 @@ components:
         rocev2:
           $ref: '#/components/schemas/State.Protocol.Rocev2'
           x-field-uid: 9
+    State.AiWorkload:
+      description: |-
+        States associated with the defined AI Workload config
+      type: object
+      properties:
+        choice:
+          type: string
+          default: ai_workload_trial
+          x-enum:
+            ai_workload_trial:
+              x-field-uid: 1
+          x-field-uid: 1
+          enum:
+          - ai_workload_trial
+        ai_workload_trial:
+          $ref: '#/components/schemas/State.AiWorkload.Trial'
+          x-field-uid: 2
     State.Port.Link:
       description: |-
         Sets the link of configured ports.
@@ -20523,6 +22469,32 @@ components:
           enum:
           - up
           - down
+    State.AiWorkload.Trial:
+      description: |-
+        Provides state control of AI Workload Trials
+      type: object
+      required:
+      - state
+      properties:
+        state:
+          description: |-
+            The requested trial state.
+
+            If the value of the state property is 'start' then the trial will be run, if possible.
+
+            If the value of the state property is 'stop' then the trial will be stopped before automatically
+            completing. Normally the trial will automatically stop when all the requested combinations have
+            been executed, so this is not normally needed.
+          type: string
+          x-field-uid: 1
+          x-enum:
+            start:
+              x-field-uid: 1
+            stop:
+              x-field-uid: 2
+          enum:
+          - start
+          - stop
     Control.Action:
       description: |-
         Request for triggering action against configured resources.
@@ -26504,6 +28476,8 @@ components:
               x-field-uid: 13
             bmp_servers:
               x-field-uid: 14
+            ai_workload:
+              x-field-uid: 15
           enum:
           - ipv4_neighbors
           - ipv6_neighbors
@@ -26519,6 +28493,7 @@ components:
           - ospfv3_lsas
           - isis_adjacencies
           - bmp_servers
+          - ai_workload
         ipv4_neighbors:
           $ref: '#/components/schemas/Neighborsv4.States.Request'
           x-field-uid: 2
@@ -26561,6 +28536,9 @@ components:
         bmp_servers:
           $ref: '#/components/schemas/BmpServers.State.Request'
           x-field-uid: 15
+        ai_workload:
+          $ref: '#/components/schemas/AiWorkload.State.Request'
+          x-field-uid: 16
     States.Response:
       description: |-
         Response containing chosen traffic generator states
@@ -26599,6 +28577,8 @@ components:
               x-field-uid: 13
             bmp_servers:
               x-field-uid: 14
+            ai_workload:
+              x-field-uid: 15
           enum:
           - ipv4_neighbors
           - ipv6_neighbors
@@ -26614,6 +28594,7 @@ components:
           - ospfv3_lsas
           - isis_adjacencies
           - bmp_servers
+          - ai_workload
         ipv4_neighbors:
           type: array
           items:
@@ -26684,6 +28665,9 @@ components:
           items:
             $ref: '#/components/schemas/BmpServer.State'
           x-field-uid: 15
+        ai_workload:
+          $ref: '#/components/schemas/AiWorkload.State'
+          x-field-uid: 16
     Neighborsv4.States.Request:
       description: |-
         The request to retrieve IPv4 Neighbor state (ARP cache entries) of a network interface(s).
@@ -30838,6 +32822,68 @@ components:
             The multi exit discriminator (MED) is an optional non-transitive attribute and the value is used for route selection. The route with the lowest MED value is preferred.
           type: integer
           format: uint32
+    AiWorkload.State.Request:
+      description: |-
+        The request to retrieve the config and run states of the configured AI workload.
+      type: object
+    AiWorkload.State:
+      description: |-
+        The config and run states of the AI workload. An AI workload has two independent states: the config state, which tracks the lifecycle of the workload's configuration, and the run state, which tracks the lifecycle of the workload's automated execution.
+      type: object
+      properties:
+        start_time:
+          description: |-
+            The ISO 8601 formatted time the run was started
+          type: string
+          x-field-uid: 1
+        stop_time:
+          description: |-
+            The ISO 8601 formatted time the run ended
+          type: string
+          x-field-uid: 2
+        success_status:
+          $ref: '#/components/schemas/Warning'
+          x-field-uid: 3
+        failure_status:
+          $ref: '#/components/schemas/Error'
+          x-field-uid: 5
+        trial_state:
+          description: |-
+            The current lifecycle state of the AI workload's trial run.
+          type: string
+          x-field-uid: 4
+          x-enum:
+            unrun:
+              description: |-
+                The current trial configuration has never been run
+              x-field-uid: 1
+            started:
+              description: |-
+                The trial is running.
+              x-field-uid: 2
+            stopping:
+              description: |-
+                The trial is in the process of stopping.
+              x-field-uid: 3
+            stopped:
+              description: |-
+                The trial has been manually stopped.
+              x-field-uid: 4
+            success:
+              description: |-
+                The trial finished successfully
+              x-field-uid: 5
+            failure:
+              description: |-
+                The trial failed with an error
+              x-field-uid: 6
+          enum:
+          - unrun
+          - started
+          - stopping
+          - stopped
+          - success
+          - failure
     Capture.Request:
       description: |-
         The capture result request to the traffic generator.
