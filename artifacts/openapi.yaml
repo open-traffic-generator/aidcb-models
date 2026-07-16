@@ -32838,7 +32838,7 @@ components:
           x-field-uid: 1
         stop_time:
           description: |-
-            The ISO 8601 formatted time the run ended
+            The ISO 8601 formatted time the run was stopped
           type: string
           x-field-uid: 2
         choice:
@@ -32849,7 +32849,7 @@ components:
           x-enum:
             stopped:
               description: |-
-                The trial has been stopped.
+                Execution has been stopped.
               x-field-uid: 1
             started:
               description: |-
@@ -32857,7 +32857,7 @@ components:
               x-field-uid: 2
             stopping:
               description: |-
-                The trial is in the process of stopping.
+                Execution is in the process of stopping.
               x-field-uid: 3
           enum:
           - stopped
@@ -32877,7 +32877,13 @@ components:
         Status information about why state has stopped
       type: object
       properties:
-        choice:
+        success_result:
+          $ref: '#/components/schemas/Warning'
+          x-field-uid: 3
+        error_result:
+          $ref: '#/components/schemas/Error'
+          x-field-uid: 5
+        reason:
           type: string
           x-field-uid: 1
           x-enum:
@@ -32893,7 +32899,7 @@ components:
               description: |-
                 The last trial execution was stopped manually
               x-field-uid: 3
-            failure:
+            error:
               description: |-
                 The last trial execution failed with an error
               x-field-uid: 4
@@ -32901,32 +32907,13 @@ components:
           - unrun
           - success
           - manual
-          - failure
-        unrun:
-          $ref: '#/components/schemas/Ai.Workload.State.Stopped.Unrun'
-          x-field-uid: 2
-        success:
-          $ref: '#/components/schemas/Warning'
-          x-field-uid: 3
-        manual:
-          $ref: '#/components/schemas/Ai.Workload.State.Stopped.Manual'
-          x-field-uid: 4
-        failure:
-          $ref: '#/components/schemas/Error'
-          x-field-uid: 5
-    Ai.Workload.State.Stopped.Unrun:
-      description: |-
-        (Empty) Status associated with a new, never run configuration
-    Ai.Workload.State.Stopped.Manual:
-      description: |-
-        (Empty) Status associated with a run that was manually stopped
+          - error
     AiWorkload.State.Started:
       description: |-
-        (empty) Status associated with a run in progress
+        (Empty) Status information about the started state
     AiWorkload.State.Stopping:
       description: |-
-        (empty) Status information associated with a run in the process of stopping
-      type: object
+        (Empty) Status information about the stopping state
     Capture.Request:
       description: |-
         The capture result request to the traffic generator.

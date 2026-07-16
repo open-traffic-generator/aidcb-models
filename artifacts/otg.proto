@@ -23670,7 +23670,7 @@ message AiWorkloadState {
   // The ISO 8601 formatted time the run was started
   optional string start_time = 1;
 
-  // The ISO 8601 formatted time the run ended
+  // The ISO 8601 formatted time the run was stopped
   optional string stop_time = 2;
 
   message Choice {
@@ -23697,44 +23697,30 @@ message AiWorkloadState {
 // Status information about why state has stopped
 message AiWorkloadStateStopped {
 
-  message Choice {
+  // Description missing in models
+  Warning success_result = 3;
+
+  // Description missing in models
+  Error error_result = 5;
+
+  message Reason {
     enum Enum {
       unspecified = 0;
       unrun = 1;
       success = 2;
       manual = 3;
-      failure = 4;
+      error = 4;
     }
   }
   // Description missing in models
-  optional Choice.Enum choice = 1;
-
-  // Description missing in models
-  AiWorkloadStateStoppedUnrun unrun = 2;
-
-  // Description missing in models
-  Warning success = 3;
-
-  // Description missing in models
-  AiWorkloadStateStoppedManual manual = 4;
-
-  // Description missing in models
-  Error failure = 5;
+  optional Reason.Enum reason = 1;
 }
 
-// (Empty) Status associated with a new, never run configuration
-message AiWorkloadStateStoppedUnrun {
-}
-
-// (Empty) Status associated with a run that was manually stopped
-message AiWorkloadStateStoppedManual {
-}
-
-// (empty) Status associated with a run in progress
+// (Empty) Status information about the started state
 message AiWorkloadStateStarted {
 }
 
-// (empty) Status information associated with a run in the process of stopping
+// (Empty) Status information about the stopping state
 message AiWorkloadStateStopping {
 }
 
