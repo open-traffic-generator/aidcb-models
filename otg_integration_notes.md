@@ -1,5 +1,7 @@
 # OTG Integration Notes
 
+- Transport settings (network layers 1-4) were moved from `ai_workload` onto the native OTG config surface — see [aiworkload-transport-migration.md](aiworkload-transport-migration.md) for the full old→new mapping and design decisions.
+
 - Methods
     1. Converted to state changes (idempotent approach)
 
