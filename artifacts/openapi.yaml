@@ -699,6 +699,11 @@ components:
           items:
             $ref: '#/components/schemas/Device.Dhcpv6client'
           x-field-uid: 10
+        qos:
+          description: |-
+            PRIVATE: Quality of Service configuration for this interface.
+          $ref: '#/components/schemas/Qos.Settings'
+          x-field-uid: 101
       required:
       - name
     Ethernet.Connection:
@@ -708,7 +713,7 @@ components:
       properties:
         choice:
           description: |-
-            port_name, lag_name, vxlan_name or simulated_link
+            port_name, lag_name, vxlan_name, simulated_link or port_names
           type: string
           x-field-uid: 1
           x-enum:
@@ -720,11 +725,14 @@ components:
               x-field-uid: 3
             simulated_link:
               x-field-uid: 4
+            port_names:
+              x-field-uid: 101
           enum:
           - port_name
           - lag_name
           - vxlan_name
           - simulated_link
+          - port_names
         port_name:
           description: |
             Name of the port that the Ethernet interface is configured on.
@@ -760,6 +768,21 @@ components:
         simulated_link:
           x-field-uid: 5
           $ref: '#/components/schemas/Ethernet.SimulatedLink'
+        port_names:
+          description: |
+            Names of multiple ports that this Ethernet interface may be
+            emulated across. Traffic to or from this interface may be
+            generated or received on any of the listed ports. Used when a
+            single emulated interface is backed by more than one test port.
+
+            x-constraint:
+            - /components/schemas/Port/properties/name
+          type: array
+          items:
+            type: string
+          x-constraint:
+          - /components/schemas/Port/properties/name
+          x-field-uid: 101
     Ethernet.SimulatedLink:
       description: |-
         Details of the internal link which can be used to create simulated device topologies behind an emulated router. MAC, VLAN and MTU information for the internal links are not used for purposes of emulating Simulated Topologies ( e.g. by ISIS Emulated Router behind which this is configured )
@@ -1894,6 +1917,74 @@ components:
             UTF-8 strings are parameters needed for booting, e.g., kernel parameters.
           type: string
           x-field-uid: 1
+    Qos.Settings:
+      description: |-
+        PRIVATE: Quality of Service configuration for an Ethernet interface.
+      type: object
+      properties:
+        priority_trust_mode:
+          description: |-
+            PRIVATE: Priority trust mode. dscp = trust based on Differentiated Services Code Point.
+          type: string
+          default: dscp
+          x-field-uid: 1
+          x-enum:
+            dscp:
+              x-field-uid: 1
+          enum:
+          - dscp
+        dscp_to_priority:
+          description: |-
+            PRIVATE: DSCP to priority mappings.
+          type: array
+          items:
+            $ref: '#/components/schemas/Qos.DscpToPriority'
+          x-field-uid: 2
+        priority_to_traffic_class:
+          description: |-
+            PRIVATE: Priority to traffic class mappings.
+          type: array
+          items:
+            $ref: '#/components/schemas/Qos.PriorityToTrafficClass'
+          x-field-uid: 3
+    Qos.DscpToPriority:
+      description: |-
+        PRIVATE: Maps a DSCP value to a priority.
+      type: object
+      properties:
+        dscp:
+          description: |-
+            PRIVATE: The Differentiated Services Code Point value to map.
+          type: integer
+          format: uint32
+          maximum: 63
+          x-field-uid: 1
+        priority:
+          description: |-
+            PRIVATE: The priority the DSCP value is mapped to.
+          type: integer
+          format: uint32
+          maximum: 7
+          x-field-uid: 2
+    Qos.PriorityToTrafficClass:
+      description: |-
+        PRIVATE: Maps a priority to a traffic class.
+      type: object
+      properties:
+        priority:
+          description: |-
+            PRIVATE: The priority value to map.
+          type: integer
+          format: uint32
+          maximum: 7
+          x-field-uid: 1
+        traffic_class:
+          description: |-
+            PRIVATE: The traffic class the priority is mapped to.
+          type: integer
+          format: uint32
+          maximum: 7
+          x-field-uid: 2
     Lag.Port.Macsec:
       description: |-
         Configuration of MACsec per LAG member port. This MACsec configuration per LAG member port and MACsec configuration in any Ethernet device a) on this port or b) on this LAG are mutually exclusive.
@@ -3308,61 +3399,183 @@ components:
           - inline_crypto
     Layer1:
       description: |-
-        Layer 1 physical configuration for a test port.
+        A container for layer1 settings.
       type: object
+      required:
+      - port_names
+      - name
       properties:
-        speed_mode:
-          type: string
-          description: |-
-            Speed, modulation, and FEC mode for the physical link. Default is speed_400ge_pam4_106g_kp4_fec.
+        port_names:
+          description: "A list of unique names of port objects that will share the\n\
+            choice settings. \n\nx-constraint:\n- /components/schemas/Port/properties/name\n"
+          type: array
+          items:
+            type: string
+          x-constraint:
+          - /components/schemas/Port/properties/name
           x-field-uid: 1
-          x-enum:
-            speed_800ge_pam4_106g_kp4_fec:
-              x-field-uid: 1
-            speed_400ge_pam4_106g_kp4_fec:
-              x-field-uid: 2
-            speed_400ge_pam4_53g_kp4_fec:
-              x-field-uid: 3
-            speed_200ge_pam4_106g_kp4_fec:
-              x-field-uid: 4
-            speed_200ge_pam4_53g_kp4_fec:
-              x-field-uid: 5
-            speed_100ge_pam4_106g_kp4_fec:
-              x-field-uid: 6
-            speed_100ge_pam4_106g_rs_fec:
-              x-field-uid: 7
-            speed_100ge_pam4_53g_kp4_fec:
-              x-field-uid: 8
-            speed_100ge_nrz_rs_fec:
-              x-field-uid: 9
-            speed_100ge_nrz_no_fec:
-              x-field-uid: 10
-          enum:
-          - speed_800ge_pam4_106g_kp4_fec
-          - speed_400ge_pam4_106g_kp4_fec
-          - speed_400ge_pam4_53g_kp4_fec
-          - speed_200ge_pam4_106g_kp4_fec
-          - speed_200ge_pam4_53g_kp4_fec
-          - speed_100ge_pam4_106g_kp4_fec
-          - speed_100ge_pam4_106g_rs_fec
-          - speed_100ge_pam4_53g_kp4_fec
-          - speed_100ge_nrz_rs_fec
-          - speed_100ge_nrz_no_fec
-        auto_negotiate:
-          type: boolean
+        speed:
           description: |-
-            Enable or disable auto negotiation. Default false.
+            Set the speed if supported. When no speed is explicitly set, the current
+            speed of underlying test interface shall be assumed.
+          type: string
           x-field-uid: 2
-        link_training:
-          type: boolean
+          x-enum:
+            speed_10_fd_mbps:
+              x-field-uid: 1
+            speed_10_hd_mbps:
+              x-field-uid: 2
+            speed_100_fd_mbps:
+              x-field-uid: 3
+            speed_100_hd_mbps:
+              x-field-uid: 4
+            speed_1_gbps:
+              x-field-uid: 5
+            speed_10_gbps:
+              x-field-uid: 6
+            speed_25_gbps:
+              x-field-uid: 7
+            speed_40_gbps:
+              x-field-uid: 8
+            speed_50_gbps:
+              x-field-uid: 9
+            speed_100_gbps:
+              x-field-uid: 10
+            speed_200_gbps:
+              x-field-uid: 11
+            speed_400_gbps:
+              x-field-uid: 12
+            speed_800_gbps:
+              x-field-uid: 13
+          enum:
+          - speed_10_fd_mbps
+          - speed_10_hd_mbps
+          - speed_100_fd_mbps
+          - speed_100_hd_mbps
+          - speed_1_gbps
+          - speed_10_gbps
+          - speed_25_gbps
+          - speed_40_gbps
+          - speed_50_gbps
+          - speed_100_gbps
+          - speed_200_gbps
+          - speed_400_gbps
+          - speed_800_gbps
+        media:
           description: |-
-            Enable or disable link training. Default false.
+            Set the type of media for test interface if supported. When no media
+            type is explicitly set, the current media type of underlying test
+            interface shall be assumed.
+          type: string
           x-field-uid: 3
-        ieee_defaults:
-          type: boolean
+          x-enum:
+            copper:
+              x-field-uid: 1
+            fiber:
+              x-field-uid: 2
+            sgmii:
+              x-field-uid: 3
+          enum:
+          - copper
+          - fiber
+          - sgmii
+        promiscuous:
           description: |-
-            Enable or disable IEEE defaults. Takes precedence over auto_negotiate and link_training. Default false.
+            Enable promiscuous mode on test interface. A warning shall be raised if
+            this field is set to `true`, even when it's not supported, ignoring
+            the setting altogether.
+          type: boolean
+          default: true
           x-field-uid: 4
+        mtu:
+          description: |-
+            Set the maximum transmission unit size. A warning shall be raised if
+            the specified value is valid but not supported, ignoring the setting altogether.
+          type: integer
+          format: uint32
+          minimum: 64
+          maximum: 14000
+          default: 1500
+          x-field-uid: 5
+        ieee_media_defaults:
+          description: |-
+            Under Review: This field is currently under review for pending exploration on use cases
+
+            Set to true to override the auto_negotiate, link_training
+            and rs_fec settings for gigabit ethernet interfaces.
+          type: boolean
+          x-field-uid: 6
+          x-status:
+            status: under-review
+            information: This field is currently under review for pending exploration
+              on use cases
+        auto_negotiate:
+          description: |-
+            Under Review: This field is currently under review for pending exploration on use cases, given that a separate configuration called `AutoNegotiation` already exists.
+
+            Enable/disable auto negotiation.
+          type: boolean
+          x-field-uid: 7
+          x-status:
+            status: under-review
+            information: This field is currently under review for pending exploration
+              on use cases, given that a separate configuration called `AutoNegotiation`
+              already exists.
+        auto_negotiation:
+          $ref: '#/components/schemas/Layer1.AutoNegotiation'
+          x-field-uid: 8
+        flow_control:
+          $ref: '#/components/schemas/Layer1.FlowControl'
+          x-field-uid: 9
+        name:
+          x-field-uid: 10
+          description: |-
+            Globally unique name of an object. It also serves as the primary key for arrays of objects.
+          type: string
+          x-unique: global
+        signaling:
+          description: |-
+            Physical lane signaling for the configured speed. Combined with
+            'speed' this determines the number of lanes and the per-lane rate,
+            e.g. speed_400_gbps with pam4_106_gbps implies 4 lanes at
+            106.25 Gbps each.
+            When no signaling is explicitly set, the interface default
+            signaling for the configured speed shall be assumed.
+          type: string
+          x-field-uid: 101
+          x-enum:
+            nrz:
+              x-field-uid: 1
+            pam4_53_gbps:
+              x-field-uid: 2
+            pam4_106_gbps:
+              x-field-uid: 3
+          enum:
+          - nrz
+          - pam4_53_gbps
+          - pam4_106_gbps
+        fec_mode:
+          description: |-
+            Forward error correction mode.
+            no_fec: FEC disabled.
+            rs_fec: Reed-Solomon RS(528,514) FEC, IEEE 802.3 Clause 91.
+            rs_fec_kp4: Reed-Solomon RS(544,514) FEC, IEEE 802.3 Clause 134 (KP4).
+            When set, this field takes precedence over auto_negotiation.rs_fec.
+            When no fec_mode is explicitly set, the interface default FEC for
+            the configured speed shall be assumed.
+          type: string
+          x-field-uid: 102
+          x-enum:
+            no_fec:
+              x-field-uid: 1
+            rs_fec:
+              x-field-uid: 2
+            rs_fec_kp4:
+              x-field-uid: 3
+          enum:
+          - no_fec
+          - rs_fec
+          - rs_fec_kp4
     Layer1.AutoNegotiation:
       description: |-
         Configuration for auto negotiation settings
@@ -3601,6 +3814,13 @@ components:
             Globally unique name of an object. It also serves as the primary key for arrays of objects.
           type: string
           x-unique: global
+        max_file_size:
+          description: |-
+            PRIVATE: Maximum capture file size in bytes. A value of 0 or null means no explicit limit.
+          type: integer
+          format: uint32
+          maximum: 268435456
+          x-field-uid: 101
     Capture.Filter:
       description: |-
         Configuration for capture filters
@@ -19131,25 +19351,6 @@ components:
       description: |-
         Strongly-typed configuration for the Keysight SCP simulation platform. Placeholder — parameters will be added as requirements are identified.
       type: object
-    TcpStoreConfig:
-      description: |-
-        TCPStore endpoint address used for Queue Pair negotiation when qp_negotiation is tcp_store.
-      type: object
-      properties:
-        host:
-          type: string
-          default: localhost
-          description: |-
-            Hostname or IP address of the TCPStore. Default is localhost.
-          x-field-uid: 1
-        port:
-          type: integer
-          default: 12345
-          minimum: 1024
-          maximum: 65535
-          description: |-
-            Port number of the TCPStore.
-          x-field-uid: 2
     CcbBenchmark:
       description: |-
         CCB benchmark configuration. Defines a collective communication test.
@@ -19812,7 +20013,7 @@ components:
           x-field-uid: 3
     NicBinding:
       description: |-
-        Binds logical NIC settings to a NIC defined in the Chakra infrastructure.
+        Binds a NIC defined in the Chakra infrastructure to an emulated OTG Ethernet interface that carries all of its network-stack settings (MTU, MAC, VLANs, IP addressing, QoS, RoCEv2 peers).
       type: object
       properties:
         infra_ref:
@@ -19820,18 +20021,16 @@ components:
           description: |-
             Reference to a NIC defined in the Chakra infrastructure.
           x-field-uid: 1
-        nic_settings:
-          $ref: '#/components/schemas/NicSettings'
-          description: |-
-            NIC configuration settings. Auto-populated but can be overridden by the user.
-          x-field-uid: 2
-        associated_physical_bindings:
-          type: array
-          items:
-            $ref: '#/components/schemas/InfraRef'
-          description: |-
-            Flows from this NIC may be generated by test ports from any of these associated physical bindings.
-          x-field-uid: 3
+        ethernet_name:
+          type: string
+          x-constraint:
+          - /components/schemas/Device.Ethernet/properties/name
+          description: |
+            The name of the Device.Ethernet interface that models this NIC. The interface's connection (port_name or port_names) determines which test ports may generate this NIC's flows.
+
+            x-constraint:
+            - /components/schemas/Device.Ethernet/properties/name
+          x-field-uid: 4
     PhysicalBinding:
       description: |-
         Binds a logical infrastructure element to a physical test resource, specifying platform type and per-platform configuration.
@@ -19852,6 +20051,16 @@ components:
           description: |-
             Per-platform configuration for this physical binding.
           x-field-uid: 3
+        port_name:
+          type: string
+          x-constraint:
+          - /components/schemas/Port/properties/name
+          description: |
+            The name of the test port representing this physical resource. The port's location, layer1 and per-port options carry the physical settings previously configured on this binding.
+
+            x-constraint:
+            - /components/schemas/Port/properties/name
+          x-field-uid: 4
     PhysicalBindingConfig:
       description: |-
         Per-binding platform configuration. The active sub-object is determined by PhysicalBinding.platform. Multiple sub-objects may be present but only the one matching the binding's platform is used.
@@ -19879,600 +20088,16 @@ components:
           x-field-uid: 4
     BindingKeysightHwConfig:
       description: |-
-        Physical binding settings for the Keysight hardware platform.
+        Physical binding settings for the Keysight hardware platform. Placeholder — chassis location moved to Port.location; layer1 and capture settings moved to the OTG layer1 and captures sections (see aiworkload-transport-migration.md).
       type: object
-      properties:
-        chassis_location:
-          $ref: '#/components/schemas/ChassisInfo'
-          description: |-
-            Chassis location for this binding.
-          x-field-uid: 1
-        layer1:
-          $ref: '#/components/schemas/Layer1'
-          description: |-
-            Layer 1 physical settings such as link speed, duplex mode, and FEC.
-          x-field-uid: 2
-        capture:
-          $ref: '#/components/schemas/PacketCapture'
-          description: |-
-            PRIVATE: Packet capture settings.
-          x-field-uid: 3
     BindingKeysightSwConfig:
       description: |-
-        Physical binding settings for the Keysight software agent platform.
+        Physical binding settings for the Keysight software agent platform. Placeholder — server location moved to Port.location; layer1 and capture settings moved to the OTG layer1 and captures sections (see aiworkload-transport-migration.md).
       type: object
-      properties:
-        server_location:
-          $ref: '#/components/schemas/ServerInfo'
-          description: |-
-            Server location for this binding.
-          x-field-uid: 1
-        layer1:
-          $ref: '#/components/schemas/Layer1'
-          description: |-
-            Layer 1 physical settings such as link speed, duplex mode, and FEC.
-          x-field-uid: 2
-        capture:
-          $ref: '#/components/schemas/PacketCapture'
-          description: |-
-            PRIVATE: Packet capture settings.
-          x-field-uid: 3
     BindingKeysightNcclTestConfig:
       description: |-
-        Physical binding settings for the Keysight NCCL test platform.
+        Physical binding settings for the Keysight NCCL test platform. Placeholder — server location moved to Port.location; layer1 and capture settings moved to the OTG layer1 and captures sections (see aiworkload-transport-migration.md).
       type: object
-      properties:
-        server_location:
-          $ref: '#/components/schemas/ServerInfo'
-          description: |-
-            Server location for this binding.
-          x-field-uid: 1
-        layer1:
-          $ref: '#/components/schemas/Layer1'
-          description: |-
-            Layer 1 physical settings such as link speed, duplex mode, and FEC.
-          x-field-uid: 2
-        capture:
-          $ref: '#/components/schemas/PacketCapture'
-          description: |-
-            PRIVATE: Packet capture settings.
-          x-field-uid: 3
-    ChassisInfo:
-      description: |-
-        Information about a hardware appliance with a management interface and network ports
-      type: object
-      properties:
-        address:
-          type: string
-          description: |-
-            Chassis IP address or FQDN.
-          x-field-uid: 1
-        port:
-          type: string
-          description: |-
-            Chassis port. Format: <front-panel-port> or <front-panel-port>.<fanout>. Examples: '1' or '1.4'. Default is '1'.
-          x-field-uid: 2
-    ServerInfo:
-      description: |-
-        Information about a server used for emulation.
-      type: object
-      properties:
-        address:
-          type: string
-          description: |-
-            Server IP address or FQDN.
-          x-field-uid: 1
-        nic_interface:
-          type: string
-          description: |-
-            NIC interface name on the server.
-          x-field-uid: 2
-    NicSettings:
-      description: |-
-        Network Interface Card configuration settings.
-      type: object
-      properties:
-        ethernet_mtu:
-          type: integer
-          default: 8192
-          minimum: 68
-          maximum: 14000
-          description: |-
-            Ethernet Maximum Transmission Unit in bytes.
-          x-field-uid: 1
-        ip_addressing:
-          $ref: '#/components/schemas/NicIpAddressing'
-          description: |-
-            IP addressing configuration (IPv4 or IPv6).
-          x-field-uid: 2
-        qos:
-          $ref: '#/components/schemas/Qos'
-          description: |-
-            PRIVATE: Quality of service configuration.
-          x-field-uid: 3
-        congestion_control:
-          $ref: '#/components/schemas/CongestionControl'
-          description: |-
-            Congestion control configuration (ECN, PFC, DCQCN).
-          x-field-uid: 4
-        packet_capture:
-          $ref: '#/components/schemas/PacketCapture'
-          description: |-
-            PRIVATE: Packet capture settings for this NIC.
-          x-field-uid: 5
-        mac_address:
-          type: string
-          default: 00:00:00:00:00:00
-          description: |-
-            MAC address. Default 00:00:00:00:00:00 means auto-assigned.
-          x-field-uid: 6
-        vlan:
-          $ref: '#/components/schemas/Vlan'
-          description: |-
-            VLAN configuration.
-          x-field-uid: 7
-        transport:
-          $ref: '#/components/schemas/NicTransport'
-          description: |-
-            Transport-specific NIC settings.
-          x-field-uid: 8
-    NicIpAddressing:
-      description: |-
-        IP addressing configuration for a NIC — selects between IPv4 and IPv6.
-      type: object
-      properties:
-        ip_version:
-          type: string
-          description: |-
-            Selects the IP addressing mode for this NIC.
-          x-field-uid: 1
-          x-enum:
-            ipv4:
-              x-field-uid: 1
-            ipv6:
-              x-field-uid: 2
-          enum:
-          - ipv4
-          - ipv6
-        ipv4:
-          $ref: '#/components/schemas/Ipv4Addressing'
-          description: |-
-            IPv4 addressing configuration. Active when ip_version is ipv4.
-          x-field-uid: 2
-        ipv6:
-          $ref: '#/components/schemas/Ipv6Addressing'
-          description: |-
-            IPv6 addressing configuration. Active when ip_version is ipv6.
-          x-field-uid: 3
-    NicTransport:
-      description: |-
-        Transport-specific NIC settings.
-      type: object
-      properties:
-        rocev2:
-          $ref: '#/components/schemas/Rocev2TransportSettings'
-          description: |-
-            RoCEv2 transport-specific NIC settings.
-          x-field-uid: 1
-    Ipv4Addressing:
-      description: |-
-        IPv4 addressing configuration for a NIC.
-      type: object
-      properties:
-        ip_address:
-          type: string
-          default: 192.0.2.2
-          description: |-
-            IPv4 address.
-          x-field-uid: 1
-        ip_prefix:
-          type: integer
-          default: 24
-          minimum: 1
-          maximum: 32
-          description: |-
-            IPv4 prefix length.
-          x-field-uid: 2
-        ip_gateway_address:
-          type: string
-          default: 192.0.2.1
-          description: |-
-            Gateway IPv4 address.
-          x-field-uid: 3
-    Ipv6Addressing:
-      description: |-
-        IPv6 addressing configuration for a NIC.
-      type: object
-      properties:
-        ip_address:
-          type: string
-          default: 2001:db8::2
-          description: |-
-            IPv6 address.
-          x-field-uid: 1
-        ip_prefix:
-          type: integer
-          default: 32
-          minimum: 1
-          maximum: 128
-          description: |-
-            IPv6 prefix length.
-          x-field-uid: 2
-        ip_gateway_address:
-          type: string
-          default: 2001:db8::1
-          description: |-
-            Gateway IPv6 address.
-          x-field-uid: 3
-    Vlan:
-      description: |-
-        VLAN configuration.
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          default: false
-          description: |-
-            Enable or disable VLAN.
-          x-field-uid: 1
-        vlan_tags:
-          type: array
-          items:
-            $ref: '#/components/schemas/VlanTag'
-          description: |-
-            List of VLAN tags. Currently one tag is supported.
-          x-field-uid: 2
-    VlanTag:
-      description: |-
-        A single VLAN tag.
-      type: object
-      properties:
-        priority:
-          type: integer
-          default: 0
-          minimum: 0
-          maximum: 7
-          description: |-
-            VLAN priority (802.1p). Default 0.
-          x-field-uid: 1
-        vlan_id:
-          type: integer
-          default: 1
-          minimum: 1
-          maximum: 4094
-          description: |-
-            VLAN ID. Default 1.
-          x-field-uid: 2
-    Rocev2TransportSettings:
-      description: |-
-        RoCEv2 transport-specific NIC settings.
-      type: object
-      properties:
-        ack_dscp:
-          type: integer
-          default: 26
-          minimum: 0
-          maximum: 63
-          description: |-
-            DSCP value for RoCEv2 ACK packets.
-          x-field-uid: 1
-        nack_dscp:
-          type: integer
-          default: 26
-          minimum: 0
-          maximum: 63
-          description: |-
-            DSCP value for RoCEv2 NACK packets.
-          x-field-uid: 2
-        data_dscp:
-          type: integer
-          default: 26
-          minimum: 0
-          maximum: 63
-          description: |-
-            DSCP value for RoCEv2 data packets.
-          x-field-uid: 3
-    CongestionControl:
-      description: |-
-        Congestion control mechanism configuration.
-      type: object
-      properties:
-        ecn:
-          $ref: '#/components/schemas/ExplicitCongestionNotifications'
-          description: |-
-            Explicit Congestion Notification (ECN) configuration.
-          x-field-uid: 1
-        pfc:
-          $ref: '#/components/schemas/PriorityFlowControl'
-          description: |-
-            Priority Flow Control (PFC) configuration.
-          x-field-uid: 2
-        dcqcn_rate_control:
-          $ref: '#/components/schemas/DCQCNRateControl'
-          description: |-
-            Data Center Quantized Congestion Notification (DCQCN) rate control configuration.
-          x-field-uid: 3
-    ExplicitCongestionNotifications:
-      description: |-
-        ECN (Explicit Congestion Notification) configuration.
-      type: object
-      properties:
-        cnp_dscp:
-          type: integer
-          default: 48
-          minimum: 0
-          maximum: 63
-          description: |-
-            DSCP of Congestion Notification Packets (CNP).
-          x-field-uid: 1
-        data_ecn_bits:
-          type: string
-          default: ect1
-          description: |-
-            ECN bits for data packets. disabled: 00 Non-ECT — ECN not supported. ect1: 01 ECT(1) — ECN-capable transport. ect0: 10 ECT(0) — ECN-capable transport (alternate codepoint).
-          x-field-uid: 2
-          x-enum:
-            disabled:
-              x-field-uid: 1
-            ect1:
-              x-field-uid: 2
-            ect0:
-              x-field-uid: 3
-          enum:
-          - disabled
-          - ect1
-          - ect0
-        control_ecn_bits:
-          type: string
-          default: ect1
-          description: |-
-            ECN bits for control packets (e.g. RoCEv2 ACKs). disabled: 00 Non-ECT — ECN not supported. ect1: 01 ECT(1) — ECN-capable transport. ect0: 10 ECT(0) — ECN-capable transport (alternate codepoint).
-          x-field-uid: 3
-          x-enum:
-            disabled:
-              x-field-uid: 1
-            ect1:
-              x-field-uid: 2
-            ect0:
-              x-field-uid: 3
-          enum:
-          - disabled
-          - ect1
-          - ect0
-        cnp_ecn_bits:
-          type: string
-          default: ect1
-          description: |-
-            ECN bits for CNP packets. disabled: 00 Non-ECT — ECN not supported. ect1: 01 ECT(1) — ECN-capable transport. ect0: 10 ECT(0) — ECN-capable transport (alternate codepoint).
-          x-field-uid: 4
-          x-enum:
-            disabled:
-              x-field-uid: 1
-            ect1:
-              x-field-uid: 2
-            ect0:
-              x-field-uid: 3
-          enum:
-          - disabled
-          - ect1
-          - ect0
-    PriorityFlowControl:
-      description: |-
-        Priority Flow Control (PFC) configuration.
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          default: true
-          description: |-
-            Enable or disable Priority Flow Control.
-          x-field-uid: 1
-        priorities:
-          type: array
-          items:
-            type: integer
-            minimum: 0
-            maximum: 7
-          default:
-          - 3
-          description: |-
-            List of priorities (0-7) for which PFC is enabled.
-          x-field-uid: 2
-    DCQCNRateControl:
-      description: |-
-        DCQCN (Data Center Quantized Congestion Notification) rate control settings.
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          default: false
-          description: |-
-            Enable or disable DCQCN. Default false.
-          x-field-uid: 1
-        alpha_factor:
-          type: integer
-          default: 1019
-          minimum: 0
-          maximum: 1023
-          description: |-
-            Factor to update Alpha every update period (fixed point fraction of 2^10).
-          x-field-uid: 2
-        alpha_interval:
-          type: integer
-          default: 21
-          minimum: 1
-          maximum: 131071
-          description: |-
-            Alpha update period in microseconds.
-          x-field-uid: 3
-        initial_alpha:
-          type: integer
-          default: 1023
-          minimum: 1
-          maximum: 1023
-          description: |-
-            Initial Alpha value.
-          x-field-uid: 4
-        rate_after_first_cnp:
-          type: integer
-          default: 10000
-          minimum: 1
-          maximum: 1600000
-          description: |-
-            Current and target rate limit set after first CNP in Mbps.
-          x-field-uid: 5
-        rate_decrement_factor:
-          type: number
-          default: 50
-          minimum: 0
-          maximum: 100
-          description: |-
-            Maximal ratio of rate decrease in a single event (percentage).
-          x-field-uid: 6
-        min_rate_limit:
-          type: integer
-          default: 1
-          minimum: 1
-          maximum: 1600000
-          description: |-
-            Minimal rate limit of the QP in Mbps.
-          x-field-uid: 7
-        rate_decrement_coefficient:
-          type: integer
-          default: 11
-          minimum: 10
-          maximum: 11
-          description: |-
-            The coefficient between Alpha and the rate reduction factor.
-          x-field-uid: 8
-        rate_decrement_interval:
-          type: integer
-          default: 21
-          minimum: 1
-          maximum: 2147483647
-          description: |-
-            Minimum time period between rate reductions in microseconds.
-          x-field-uid: 9
-        clamp_target_rate:
-          type: boolean
-          default: false
-          description: |-
-            When a CNP is processed, update the target rate to the current rate. Default false.
-          x-field-uid: 10
-        rate_increment_interval:
-          type: integer
-          default: 300
-          minimum: 1
-          maximum: 131071
-          description: |-
-            Time period between rate increase events in microseconds.
-          x-field-uid: 11
-        rate_increment_byte_counter:
-          type: integer
-          default: 32767
-          minimum: 1
-          maximum: 32767
-          description: |-
-            Sent bytes counter between rate increase events (unit: 64B).
-          x-field-uid: 12
-        rate_increment_threshold:
-          type: integer
-          default: 1
-          minimum: 1
-          maximum: 31
-          description: |-
-            Threshold of rate increase events for moving to next rate increase phase.
-          x-field-uid: 13
-        additive_rate_increment:
-          type: integer
-          default: 5
-          minimum: 1
-          maximum: 1600000
-          description: |-
-            Rate increase value in the Additive Increase phase in Mbps.
-          x-field-uid: 14
-        hyper_rate_increment:
-          type: integer
-          default: 50
-          minimum: 1
-          maximum: 1600000
-          description: |-
-            Rate increase value in the Hyper Increase phase in Mbps.
-          x-field-uid: 15
-        time_between_cnps:
-          type: integer
-          default: 4
-          minimum: 1
-          maximum: 255
-          description: |-
-            Minimal time between two consecutive CNPs sent in microseconds.
-          x-field-uid: 16
-    Qos:
-      description: |-
-        PRIVATE: Quality of Service configuration.
-      type: object
-      properties:
-        priority_trust_mode:
-          type: string
-          description: |-
-            PRIVATE: Priority trust mode. dscp = trust based on Differentiated Services Code Point.
-          x-field-uid: 1
-          x-enum:
-            dscp:
-              x-field-uid: 1
-          enum:
-          - dscp
-        map_dscp_to_prio:
-          $ref: '#/components/schemas/IntegerMap'
-          description: |-
-            PRIVATE: DSCP to priority mapping. Keys and values are integers.
-          x-field-uid: 2
-        map_prio_to_traffic_class:
-          $ref: '#/components/schemas/IntegerMap'
-          description: |-
-            PRIVATE: Priority to traffic class mapping. Keys and values are integers.
-          x-field-uid: 3
-    PacketCapture:
-      description: |-
-        PRIVATE: Packet capture configuration.
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          default: false
-          description: |-
-            PRIVATE: Enable or disable packet capture.
-          x-field-uid: 1
-        capture_max_file_size:
-          type: integer
-          default: 10485760
-          minimum: 0
-          maximum: 268435456
-          description: |-
-            PRIVATE: Maximum capture file size in bytes. Default 10485760 (10 MiB).
-          x-field-uid: 2
-        buffer_full_action:
-          type: string
-          default: override
-          description: |-
-            PRIVATE: Action when capture buffer is full. override: overwrite current buffer and save its contents. stop: stop capture and dump data to file. Default is override.
-          x-field-uid: 3
-          x-enum:
-            override:
-              x-field-uid: 1
-            stop:
-              x-field-uid: 2
-          enum:
-          - override
-          - stop
-        packet_slice_size:
-          type: integer
-          default: 80
-          minimum: 0
-          maximum: 262144
-          description: |-
-            PRIVATE: Size of each packet slice in bytes. 0 means capture entire packet.
-          x-field-uid: 4
     PlatformRegion:
       description: |-
         Assigns a platform to a region within the infrastructure.
@@ -20816,12 +20441,6 @@ components:
       type: object
       additionalProperties:
         type: string
-    IntegerMap:
-      description: |-
-        A map of string keys to integer values.
-      type: object
-      additionalProperties:
-        type: integer
     AiWorkload:
       description: |-
         AiWorkloadConfig contains all the information about an AiWorkload configuration to apply before running
@@ -21265,14 +20884,23 @@ components:
           default: 0.001
           x-field-uid: 13
         hyper_increment_rate:
-          description: "This is the rate at which the target rates will increase when\
-            \ the DCQCN will be in the hyper increment rate recovery mode. "
+          description: |-
+            This is the rate at which the target rates will increase when the DCQCN will be in the hyper increment rate recovery mode.
           type: number
           format: float
           minimum: 0
           maximum: 100
           default: 0.001
           x-field-uid: 14
+        rate_decrement_coefficient:
+          description: |-
+            The coefficient between alpha and the rate reduction factor.
+          type: integer
+          format: uint32
+          default: 11
+          minimum: 10
+          maximum: 11
+          x-field-uid: 101
     Macsec.PerPortSettings:
       description: |-
         MACsec hardware acceleration settings of a test port. These settings are applicable to all MACsec devices configured on this port. These settings are not applicable to MACsec configured on LAG member port.
