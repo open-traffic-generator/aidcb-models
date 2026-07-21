@@ -1,0 +1,69 @@
+components:
+  schemas:
+    Qos.Settings:
+      description: >-
+        PRIVATE: Quality of Service configuration for an Ethernet interface.
+      type: object
+      properties:
+        priority_trust_mode:
+          description: >-
+            PRIVATE: Priority trust mode. dscp = trust based on
+            Differentiated Services Code Point.
+          type: string
+          default: dscp
+          x-field-uid: 1
+          x-enum:
+            dscp:
+              x-field-uid: 1
+        dscp_to_priority:
+          description: >-
+            PRIVATE: DSCP to priority mappings.
+          type: array
+          items:
+            $ref: '#/components/schemas/Qos.DscpToPriority'
+          x-field-uid: 2
+        priority_to_traffic_class:
+          description: >-
+            PRIVATE: Priority to traffic class mappings.
+          type: array
+          items:
+            $ref: '#/components/schemas/Qos.PriorityToTrafficClass'
+          x-field-uid: 3
+    Qos.DscpToPriority:
+      description: >-
+        PRIVATE: Maps a DSCP value to a priority.
+      type: object
+      properties:
+        dscp:
+          description: >-
+            PRIVATE: The Differentiated Services Code Point value to map.
+          type: integer
+          format: uint32
+          maximum: 63
+          x-field-uid: 1
+        priority:
+          description: >-
+            PRIVATE: The priority the DSCP value is mapped to.
+          type: integer
+          format: uint32
+          maximum: 7
+          x-field-uid: 2
+    Qos.PriorityToTrafficClass:
+      description: >-
+        PRIVATE: Maps a priority to a traffic class.
+      type: object
+      properties:
+        priority:
+          description: >-
+            PRIVATE: The priority value to map.
+          type: integer
+          format: uint32
+          maximum: 7
+          x-field-uid: 1
+        traffic_class:
+          description: >-
+            PRIVATE: The traffic class the priority is mapped to.
+          type: integer
+          format: uint32
+          maximum: 7
+          x-field-uid: 2
