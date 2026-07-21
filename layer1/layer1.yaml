@@ -107,6 +107,41 @@ components:
         name:
           x-include: ../common/common.yaml#/components/schemas/Named.Object/properties/name
           x-field-uid: 10
+        signaling:
+          description: |-
+            Physical lane signaling for the configured speed. Combined with
+            'speed' this determines the number of lanes and the per-lane rate,
+            e.g. speed_400_gbps with pam4_106_gbps implies 4 lanes at
+            106.25 Gbps each.
+            When no signaling is explicitly set, the interface default
+            signaling for the configured speed shall be assumed.
+          type: string
+          x-field-uid: 101
+          x-enum:
+            nrz:
+              x-field-uid: 1
+            pam4_53_gbps:
+              x-field-uid: 2
+            pam4_106_gbps:
+              x-field-uid: 3
+        fec_mode:
+          description: |-
+            Forward error correction mode.
+            no_fec: FEC disabled.
+            rs_fec: Reed-Solomon RS(528,514) FEC, IEEE 802.3 Clause 91.
+            rs_fec_kp4: Reed-Solomon RS(544,514) FEC, IEEE 802.3 Clause 134 (KP4).
+            When set, this field takes precedence over auto_negotiation.rs_fec.
+            When no fec_mode is explicitly set, the interface default FEC for
+            the configured speed shall be assumed.
+          type: string
+          x-field-uid: 102
+          x-enum:
+            no_fec:
+              x-field-uid: 1
+            rs_fec:
+              x-field-uid: 2
+            rs_fec_kp4:
+              x-field-uid: 3
     Layer1.AutoNegotiation:
       description: |-
         Configuration for auto negotiation settings
