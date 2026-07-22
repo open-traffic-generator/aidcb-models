@@ -115,6 +115,26 @@ paths:
         default:
           $ref: '#/components/responses/Failure'
           x-field-uid: 2
+  /config/generate:
+    post:
+      tags:
+      - Configuration
+      operationId: generate_config
+      description: |-
+        Generate new configuration from a high-level description of the configuration.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Config.Generate'
+      responses:
+        '200':
+          $ref: '#/components/responses/Success'
+          x-field-uid: 1
+        default:
+          $ref: '#/components/responses/Failure'
+          x-field-uid: 2
   /control/state:
     post:
       tags:
@@ -19140,7 +19160,7 @@ components:
           description: |-
             The size of the file in bytes.
           x-field-uid: 2
-    TrialBindings:
+    AiWorkloadBindings:
       description: |-
         Describes test resources, how they are configured, and how they are attached to the topology.
       type: object
@@ -19150,15 +19170,15 @@ components:
           description: |-
             Custom binding that maps ranks to NPUs, configures NIC settings, and assigns physical test resources.
           x-field-uid: 1
-        infrastructure_profile:
-          $ref: '#/components/schemas/InfrastructureProfile'
+        logical_infrastructure:
+          $ref: '#/components/schemas/LogicalInfrastructure'
           description: |-
-            A copy of the infrastructure profile used when the binding was created. Allows trials to be re-run with the original profile version.
+            A copy of the logical infrastructure used when the binding was created. Allows trials to be re-run with the original version of the logical infrastructure.
           x-field-uid: 2
         infrastructure:
           type: string
           description: |-
-            Low-level Chakra infrastructure derived from the infrastructure_profile. JSON-encoded opaque value — see keysight_chakra.infra.Infrastructure.
+            Low-level Chakra infrastructure derived from the logical_infrastructure. JSON-encoded opaque value — see keysight_chakra.infra.Infrastructure.
           x-field-uid: 3
         infrastructure_annotations:
           type: array
@@ -20198,25 +20218,25 @@ components:
       description: |-
         Custom allocation strategy configuration.
       type: object
-    InfrastructureProfile:
+    LogicalInfrastructure:
       description: |-
-        Logical infrastructure profile describing the emulated infrastructure topology.
+        Logical logical infrastructure describing the emulated infrastructure topology.
       type: object
       properties:
         name:
           type: string
           description: |-
-            Profile name.
+            Logical infrastructure name.
           x-field-uid: 1
         id:
           type: string
           description: |-
-            System-assigned globally unique profile ID.
+            System-assigned globally unique logical infrastructure ID.
           x-field-uid: 2
         infrastructure:
           $ref: '#/components/schemas/InfrastructureConfig'
           description: |-
-            The infrastructure configuration for this profile.
+            The configuration for this logical infrastructure.
           x-field-uid: 3
     InfrastructureConfig:
       description: |-
@@ -20481,7 +20501,7 @@ components:
             Network impairment configuration applied during the trial.
           x-field-uid: 5
         bindings:
-          $ref: '#/components/schemas/TrialBindings'
+          $ref: '#/components/schemas/AiWorkloadBindings'
           description: |-
             Resource bindings used for the trial run.
           x-field-uid: 6
@@ -21353,6 +21373,49 @@ components:
             type: string
           x-constraint:
           - /components/schemas/Flow/properties/name
+          x-field-uid: 2
+    Config.Generate:
+      description: |-
+        A configuration that describes a set of new resources to be generated.
+      type: object
+      required:
+      - choice
+      properties:
+        choice:
+          type: string
+          x-enum:
+            ai_workload:
+              x-field-uid: 1
+          x-field-uid: 1
+          enum:
+          - ai_workload
+        ai_workload:
+          description: |-
+            A description of the infrastructure that the AI workload will run on.
+          $ref: '#/components/schemas/AiWorkload.Generate'
+          x-field-uid: 2
+    AiWorkload.Generate:
+      description: |-
+        An intermediate object to select what portion of an AiWorkload to generate
+      type: object
+      required:
+      - choice
+      properties:
+        choice:
+          type: string
+          x-enum:
+            infrastructure_binding:
+              x-field-uid: 1
+          x-field-uid: 1
+          enum:
+          - infrastructure_binding
+        infrastructure_binding:
+          $ref: '#/components/schemas/LogicalInfrastructure'
+          description: "The logical infrastructure configuration for the AI workload.\
+            \ \nGenerates low level ports, l1settings, devices, and a partially populated\n\
+            ai_workload in the config. The generated config be further customized\
+            \ by using\nget_config, modifying the returned config, and calling set_config\
+            \ to update it."
           x-field-uid: 2
     Control.State:
       description: |-

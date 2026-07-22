@@ -83,7 +83,7 @@ components:
           $ref: './bmpserver.yaml#/components/schemas/BmpServers.State.Request'
           x-field-uid: 15       
         ai_workload:
-          $ref: './aiworkload.yaml#/components/schemas/AiWorkload.State.Request'
+          $ref: './ai_workload.yaml#/components/schemas/AiWorkload.State.Request'
           x-field-uid: 16
     States.Response:
       description: >-
@@ -196,5 +196,5 @@ components:
             $ref: './bmpserver.yaml#/components/schemas/BmpServer.State'
           x-field-uid: 15
         ai_workload:
-          $ref: './aiworkload.yaml#/components/schemas/AiWorkload.State'
+          $ref: './ai_workload.yaml#/components/schemas/AiWorkload.State'
           x-field-uid: 16

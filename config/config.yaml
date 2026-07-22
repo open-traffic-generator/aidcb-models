@@ -80,7 +80,7 @@ components:
         ai_workload:
           description: |-
             The AI Data Center Builder application configuration
-          $ref: ../aiworkload/aiworkload.yaml#/components/schemas/AiWorkload
+          $ref: ../ai_workload/ai_workload.yaml#/components/schemas/AiWorkload
           x-field-uid: 101
     Config.Options:
       description: |-

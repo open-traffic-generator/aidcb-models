@@ -16,7 +16,7 @@ components:
         ai_workload:
           description: |-
             A description of the infrastructure that the AI workload will run on.
-          $ref: #components/schemas/AiWorkload.Generate
+          $ref: '#/components/schemas/AiWorkload.Generate'
           x-field-uid: 2
 
     AiWorkload.Generate:
@@ -33,7 +33,7 @@ components:
               x-field-uid: 1
           x-field-uid: 1
         infrastructure_binding:
-          $ref: '../aiworkload/aiworkload.yaml#/components/schemas/LogicalInfrastructure'
+          $ref: '../ai_workload/ai_workload.yaml#/components/schemas/LogicalInfrastructure'
           description: |-
             The logical infrastructure configuration for the AI workload. 
             Generates low level ports, l1settings, devices, and a partially populated
