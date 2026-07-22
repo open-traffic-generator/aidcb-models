@@ -1,0 +1,19 @@
+components:
+  schemas:
+    ApiType:
+      description: >
+        An enumeration of supported api_types/applications. Api_type entries under /capabilities document
+        the properties available for a given api_type. The client library will read the /capabilities
+        when initializing, and arrange to return an error for any property request not listed for that api_type.
+      type: string
+      default: "otg"
+      enum: ["otg", "ai_workload"]
+      x-enum:
+        otg:
+          x-field-uid: 1
+        ai_workload:
+          x-field-uid: 2
+          x-field-label: "AI Workload Profile"
+        description: |-
+          otg: "Open Traffic Generator"
+          ai_workload: "AI Workload Profile"

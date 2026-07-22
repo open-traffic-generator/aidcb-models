@@ -18,9 +18,9 @@ components:
 
 
 #
-# Warning!!!: The TrialBindings are still in progress. Do not implement any converters for this object or its children
+# Warning!!!: AiWorkloadBindings are still in progress. Do not implement any converters for this object or its children
 #
-    TrialBindings:
+    AiWorkloadBindings:
       description: >-
         Describes test resources, how they are configured, and how they are attached
         to the topology.
@@ -32,16 +32,16 @@ components:
             Custom binding that maps ranks to NPUs, configures NIC settings,
             and assigns physical test resources.
           x-field-uid: 1
-        infrastructure_profile:
-          $ref: '#/components/schemas/InfrastructureProfile'
+        logical_infrastructure:
+          $ref: '#/components/schemas/LogicalInfrastructure'
           description: >-
-            A copy of the infrastructure profile used when the binding was created.
-            Allows trials to be re-run with the original profile version.
+            A copy of the logical infrastructure used when the binding was created.
+            Allows trials to be re-run with the original version of the logical infrastructure.
           x-field-uid: 2
         infrastructure:
           type: string
           description: >-
-            Low-level Chakra infrastructure derived from the infrastructure_profile.
+            Low-level Chakra infrastructure derived from the logical_infrastructure.
             JSON-encoded opaque value — see keysight_chakra.infra.Infrastructure.
           x-field-uid: 3
         infrastructure_annotations:
@@ -1121,25 +1121,25 @@ components:
         Custom allocation strategy configuration.
       type: object
 
-    InfrastructureProfile:
+    LogicalInfrastructure:
       description: >-
-        Logical infrastructure profile describing the emulated infrastructure topology.
+        Logical logical infrastructure describing the emulated infrastructure topology.
       type: object
       properties:
         name:
           type: string
           description: >-
-            Profile name.
+            Logical infrastructure name.
           x-field-uid: 1
         id:
           type: string
           description: >-
-            System-assigned globally unique profile ID.
+            System-assigned globally unique logical infrastructure ID.
           x-field-uid: 2
         infrastructure:
           $ref: '#/components/schemas/InfrastructureConfig'
           description: >-
-            The infrastructure configuration for this profile.
+            The configuration for this logical infrastructure.
           x-field-uid: 3
 
     InfrastructureConfig:
@@ -1421,7 +1421,7 @@ components:
             Network impairment configuration applied during the trial.
           x-field-uid: 5
         bindings:
-          $ref: '#/components/schemas/TrialBindings'
+          $ref: '#/components/schemas/AiWorkloadBindings'
           description: >-
             Resource bindings used for the trial run.
           x-field-uid: 6
