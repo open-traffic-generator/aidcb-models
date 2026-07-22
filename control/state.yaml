@@ -142,6 +142,6 @@ components:
               x-field-uid: 1
           x-field-uid: 1
         ai_workload_trial:
-          $ref: './aiworkload.yaml#/components/schemas/State.AiWorkload.Trial'
+          $ref: './ai_workload.yaml#/components/schemas/State.AiWorkload.Trial'
           x-field-uid: 2
 

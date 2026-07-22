@@ -110,6 +110,8 @@ paths:
           x-field-uid: 2
   /config/generate:
     post:
+      tags: ['Configuration']
+      operationId: generate_config
       description: >-
         Generate new configuration from a high-level description of
         the configuration.
