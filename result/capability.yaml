@@ -20,7 +20,7 @@ components:
           x-status:
             status: deprecated
             information: |-
-              This property is deprecated in favor of profile.supported_properties
+              This property is deprecated in favor of api_type.supported_properties
           x-field-uid: 1
         formats:
           description: >-
@@ -35,30 +35,30 @@ components:
           items:
             type: string
           x-field-uid: 2
-        profiles:
+        api_types:
           description: >-
-            A list of supported profiles, each of which supports a subset of the OTG model.
+            A list of supported api_types, each of which supports a subset of the OTG model.
           type: array
           items:
-            $ref: '#/components/schemas/Profile.Capabilities'
+            $ref: '#/components/schemas/ApiType.Capabilities'
           x-field-uid: 3
 
-    Profile.Capabilities:
+    ApiType.Capabilities:
       type: object
       description: |-
-        Specifies the capabilities of a profile, which consists of recognized properties and/or enums,
+        Specifies the capabilities of an api_type, which consists of recognized properties and/or enums,
         and potentially property metadata overrides.
       properties:
-        profile_name:
+        api_type_name:
           type: string
           description: >-
-            The name of the profile.
+            The name of the api_type.
           x-field-uid: 1
         supported_properties:
           type: array
           description: |-
-            A list of supported properties and enums for the profile. All supported properties
-            and enums must be explicitly enumerated to prevent issues when other profiles add 
+            A list of supported properties and enums for the api_type. All supported properties
+            and enums must be explicitly enumerated to prevent issues when other api_types add
             new properties.
           items:
             type: string
