@@ -20,7 +20,7 @@ components:
           x-status:
             status: deprecated
             information: |-
-              This property is deprecated in favor of api_type.supported_properties
+              This property is deprecated in favor of facet.supported_properties
           x-field-uid: 1
         formats:
           description: >-
@@ -35,41 +35,37 @@ components:
           items:
             type: string
           x-field-uid: 2
-        api_types:
+        facets:
           description: >-
-            A list of supported api_types, each of which supports a subset of the OTG model.
+            A list of supported facets, each of which supports a subset of the OTG model.
           type: array
           items:
-            $ref: '#/components/schemas/ApiType.Capabilities'
+            $ref: '#/components/schemas/Facet.Capabilities'
           x-field-uid: 3
 
-    ApiType.Capabilities:
+    Facet.Capabilities:
       type: object
       description: |-
-        Specifies the capabilities of an api_type, which consists of recognized properties and/or enums,
+        Specifies the capabilities of a facet, which consists of recognized properties and/or enums,
         and potentially property metadata overrides.
       properties:
-        api_type_name:
-          type: string
+        facets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Facet'
           description: >-
-            The name of the api_type.
+            A list of supported facets. An OTG implementation can implement any number of
+            facets as long as they don't conflict.
           x-field-uid: 1
         supported_properties:
           type: array
           description: |-
-            A list of supported properties and enums for the api_type. All supported properties
-            and enums must be explicitly enumerated to prevent issues when other api_types add
+            A list of supported properties and enums for the facet. All supported properties
+            and enums must be explicitly enumerated to prevent issues when other facets add
             new properties.
           items:
             type: string
             x-field-uid: 2
-        property_overrides:
-          type: array
-          description: 
-            A list of schema properties to override.
-          items:
-            $ref: '#/components/schemas/PropertyOverride'
-            x-field-uid: 3
 
     PropertyOverride:
       type: object
@@ -99,3 +95,18 @@ components:
             The new maximum value for the property. For numeric fields, the client must convert the string 
             value here to the appropriate numeric type first.
           x-field-uid: 4
+
+    Facet:
+      description: >
+        An enumeration of supported facets/implementations. Facet entries under /capabilities document
+        the properties available for a given facet. The client library will read the /capabilities
+        when initializing, and arrange to return an error for any property request not listed for that facet.
+      type: string
+      default: "otg"
+      x-enum:
+        otg:
+          description: "Open Traffic Generator"
+          x-field-uid: 1
+        ai_workload:
+          description: "AI Workload Profile"
+          x-field-uid: 2
