@@ -2,7 +2,7 @@ components:
   schemas:
     LogicalInfrastructure:
       description: >-
-        Logical logical infrastructure describing the emulated infrastructure topology.
+        Logical infrastructure describing the emulated infrastructure topology.
       type: object
       properties:
         name:
