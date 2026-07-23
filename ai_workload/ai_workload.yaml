@@ -18,7 +18,7 @@ components:
 
 
 #
-# Warning!!!: AiWorkloadBindings is still in progress. Do not implement any converters for this object or its children
+# Warning!!!: AiWorkloadBindings are still in progress. Do not implement any converters for this object or its children
 #
     AiWorkloadBindings:
       description: >-

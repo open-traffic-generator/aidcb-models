@@ -2285,6 +2285,7 @@ message Layer1 {
   // Set the speed if supported. When no speed is explicitly set, the current
   // speed of underlying test interface shall be assumed.
   optional Speed.Enum speed = 2;
+<<<<<<< HEAD
 
   message Media {
     enum Enum {
@@ -2326,6 +2327,49 @@ message Layer1 {
   // Description missing in models
   Layer1AutoNegotiation auto_negotiation = 8;
 
+=======
+
+  message Media {
+    enum Enum {
+      unspecified = 0;
+      copper = 1;
+      fiber = 2;
+      sgmii = 3;
+    }
+  }
+  // Set the type of media for test interface if supported. When no media
+  // type is explicitly set, the current media type of underlying test
+  // interface shall be assumed.
+  optional Media.Enum media = 3;
+
+  // Enable promiscuous mode on test interface. A warning shall be raised if
+  // this field is set to `true`, even when it's not supported, ignoring
+  // the setting altogether.
+  // default = True
+  optional bool promiscuous = 4;
+
+  // Set the maximum transmission unit size. A warning shall be raised if
+  // the specified value is valid but not supported, ignoring the setting altogether.
+  // default = 1500
+  optional uint32 mtu = 5;
+
+  // Under Review: This field is currently under review for pending exploration on use
+  // cases
+  // 
+  // Set to true to override the auto_negotiate, link_training
+  // and rs_fec settings for gigabit ethernet interfaces.
+  optional bool ieee_media_defaults = 6;
+
+  // Under Review: This field is currently under review for pending exploration on use
+  // cases, given that a separate configuration called `AutoNegotiation` already exists.
+  // 
+  // Enable/disable auto negotiation.
+  optional bool auto_negotiate = 7;
+
+  // Description missing in models
+  Layer1AutoNegotiation auto_negotiation = 8;
+
+>>>>>>> 8fe452cbcdbef57f4ae2f17e4bd86b11f2b67574
   // Description missing in models
   Layer1FlowControl flow_control = 9;
 
@@ -14739,6 +14783,7 @@ message PlatformConfig {
   // The name of this platform
   optional string name = 1;
 
+<<<<<<< HEAD
   // The platform type to use for this trial run. To avoid requiring a schema update to
   // support new types of platform, the value is just a string, not an enum. The implementation
   // must validate. (Note: this property cannot be named choice — openapiart reserves
@@ -14754,6 +14799,76 @@ message PlatformConfig {
   // Generic properties string key/arbitrary value platform settings.  May be used by
   // all platforms. Assign all vendor-specific parameters here.
   StringMap settings = 3;
+=======
+  message Choice {
+    enum Enum {
+      unspecified = 0;
+      keysight_nccl_test = 1;
+      keysight_sw = 2;
+      keysight_hw = 3;
+      custom = 4;
+      keysight_scp_sim = 5;
+    }
+  }
+  // The platform type to use for this trial run. unspecified: platform is not set; the
+  // server applies its default. keysight_nccl_test: Keysight NCCL test platform. keysight_sw:
+  // Keysight software simulation platform. keysight_hw: Keysight hardware platform (default
+  // for most trials). custom: custom or third-party platform; use PhysicalBindingConfig.custom_settings
+  // for binding parameters. keysight_scp_sim: Keysight SCP simulation platform.
+  optional Choice.Enum choice = 2;
+
+  // Generic key/value platform settings. May be used by all platforms for testing purposes.
+  // For platform=custom, this is the primary platform configuration — pass all vendor-specific
+  // parameters here.
+  StringMap custom_settings = 3;
+
+  // Configuration specific to the Keysight NCCL test platform.
+  KeysightNcclTestConfig keysight_nccl_test = 4;
+
+  // Configuration specific to the Keysight software agent platform.
+  KeysightSwConfig keysight_sw = 5;
+
+  // Configuration specific to the Keysight hardware platform.
+  KeysightHwConfig keysight_hw = 6;
+
+  // Configuration for a custom or third-party platform. Use PhysicalBindingConfig.custom_settings
+  // for per-binding parameters.
+  CustomPlatformConfig custom = 7;
+
+  // Configuration specific to the Keysight SCP simulation platform.
+  KeysightScpSimConfig keysight_scp_sim = 8;
+}
+
+// Configuration for the Keysight NCCL test platform.
+message KeysightNcclTestConfig {
+
+  // NCCL environment variable overrides as name/value pairs.
+  StringMap nccl_env_vars = 1;
+}
+
+// Strongly-typed configuration for the Keysight software agent platform. Placeholder
+// — parameters will be added as requirements are identified.
+message KeysightSwConfig {
+}
+
+// Strongly-typed configuration for the Keysight hardware platform. Placeholder — parameters
+// will be added as requirements are identified.
+message KeysightHwConfig {
+}
+
+// Configuration for a custom or third-party platform. Allows any vendor to implement
+// the CCB API without requiring schema changes. Platform-level key/value settings go
+// in PlatformConfig.custom_settings; per-binding settings go in PhysicalBindingConfig.custom_settings.
+message CustomPlatformConfig {
+
+  // Identifies the platform vendor or implementation. Informational only.
+  optional string vendor = 1;
+}
+
+// Strongly-typed configuration for the Keysight SCP simulation platform. Placeholder
+// — parameters will be added as requirements are identified.
+message KeysightScpSimConfig {
+>>>>>>> 8fe452cbcdbef57f4ae2f17e4bd86b11f2b67574
 }
 
 // CCB benchmark configuration. Defines a collective communication test.
@@ -15237,6 +15352,36 @@ message PhysicalBindingConfig {
   // purposes. For platform=custom, this is the primary binding configuration — pass all
   // vendor-specific binding parameters here.
   StringMap custom_settings = 1;
+<<<<<<< HEAD
+=======
+
+  // Binding settings specific to the Keysight NCCL test platform.
+  BindingKeysightNcclTestConfig keysight_nccl_test = 2;
+
+  // Binding settings specific to the Keysight software agent platform.
+  BindingKeysightSwConfig keysight_sw = 3;
+
+  // Binding settings specific to the Keysight hardware platform.
+  BindingKeysightHwConfig keysight_hw = 4;
+}
+
+// Physical binding settings for the Keysight hardware platform. Placeholder — chassis
+// location moved to Port.location; layer1 and capture settings moved to the OTG layer1
+// and captures sections (see aiworkload-transport-migration.md).
+message BindingKeysightHwConfig {
+}
+
+// Physical binding settings for the Keysight software agent platform. Placeholder —
+// server location moved to Port.location; layer1 and capture settings moved to the
+// OTG layer1 and captures sections (see aiworkload-transport-migration.md).
+message BindingKeysightSwConfig {
+}
+
+// Physical binding settings for the Keysight NCCL test platform. Placeholder — server
+// location moved to Port.location; layer1 and capture settings moved to the OTG layer1
+// and captures sections (see aiworkload-transport-migration.md).
+message BindingKeysightNcclTestConfig {
+>>>>>>> 8fe452cbcdbef57f4ae2f17e4bd86b11f2b67574
 }
 
 // Assigns a platform to a region within the infrastructure.
@@ -15494,6 +15639,13 @@ message BlackboxFabric {
   optional string name = 1;
 }
 
+<<<<<<< HEAD
+=======
+// A map of string keys to string values.
+message StringMap {
+}
+
+>>>>>>> 8fe452cbcdbef57f4ae2f17e4bd86b11f2b67574
 // AiWorkloadConfig contains all the information about an AiWorkload configuration to
 // apply before running
 message AiWorkload {
@@ -16229,7 +16381,11 @@ message ConfigDeleteResources {
 }
 
 // A configuration that describes a set of new resources to be generated.
+<<<<<<< HEAD
 message ConfigGenerateRequest {
+=======
+message ConfigGenerate {
+>>>>>>> 8fe452cbcdbef57f4ae2f17e4bd86b11f2b67574
 
   message Choice {
     enum Enum {
@@ -16242,11 +16398,19 @@ message ConfigGenerateRequest {
   optional Choice.Enum choice = 1;
 
   // A description of the infrastructure that the AI workload will run on.
+<<<<<<< HEAD
   AiWorkloadConfigGenerateRequest ai_workload = 2;
 }
 
 // An intermediate object to select what portion of an AiWorkload to generate
 message AiWorkloadConfigGenerateRequest {
+=======
+  AiWorkloadGenerate ai_workload = 2;
+}
+
+// An intermediate object to select what portion of an AiWorkload to generate
+message AiWorkloadGenerate {
+>>>>>>> 8fe452cbcdbef57f4ae2f17e4bd86b11f2b67574
 
   message Choice {
     enum Enum {
@@ -16262,6 +16426,7 @@ message AiWorkloadConfigGenerateRequest {
   // Generates low level ports, l1settings, devices, and a partially populated
   // ai_workload in the config. The generated config be further customized by using
   // get_config, modifying the returned config, and calling set_config to update it.
+<<<<<<< HEAD
   AiWorkloadBindingGenerateRequest infrastructure_binding = 2;
 }
 
@@ -16283,6 +16448,9 @@ message AiWorkloadBindingGenerateRequest {
 
   // The infrastructure configuration for this profile.
   InfrastructureConfig infrastructure = 3;
+=======
+  LogicalInfrastructure infrastructure_binding = 2;
+>>>>>>> 8fe452cbcdbef57f4ae2f17e4bd86b11f2b67574
 }
 
 // Request for setting operational state of configured resources.
@@ -39684,7 +39852,11 @@ message DeleteConfigResponse {
 
 
 message GenerateConfigRequest {
+<<<<<<< HEAD
   ConfigGenerateRequest config_generate_request = 1;
+=======
+  ConfigGenerate config_generate = 1;
+>>>>>>> 8fe452cbcdbef57f4ae2f17e4bd86b11f2b67574
 }
 message GenerateConfigResponse {
   Warning warning = 1;
