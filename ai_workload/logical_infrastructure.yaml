@@ -50,11 +50,9 @@ components:
           description: >-
             Number of hosts in the fabric.
           x-field-uid: 1
-        host_type:
+        choice:
           type: string
           default: generic
-          description: >-
-            The host type. Default is generic.
           x-field-uid: 2
           x-enum:
             generic:
@@ -63,14 +61,9 @@ components:
               x-field-uid: 2
         generic:
           $ref: '#/components/schemas/GenericHost'
-          description: >-
-            Generic host configuration. Active when host_type is generic.
           x-field-uid: 3
         rackplane:
           $ref: '#/components/schemas/RackPlaneHost'
-          description: >-
-            Rack-plane host configuration. Active when host_type is rackplane.
-            Intended for use with a rackplane fabric topology.
           x-field-uid: 4
         use_npu_interconnect:
           type: boolean
@@ -116,11 +109,9 @@ components:
         Describes the overall fabric topology.
       type: object
       properties:
-        fabric_type:
+        choice:
           type: string
           default: blackbox
-          description: >-
-            The type of fabric topology. Default is blackbox.
           x-field-uid: 1
           x-enum:
             blackbox:
@@ -129,14 +120,9 @@ components:
               x-field-uid: 2
         blackbox:
           $ref: '#/components/schemas/BlackboxFabric'
-          description: >-
-            Non-detailed generic fabric where internal topology is not modeled.
-            Active when fabric_type is blackbox.
           x-field-uid: 2
         rackplane:
           $ref: '#/components/schemas/RackPlaneFabric'
-          description: >-
-            Multi-plane rack fabric topology. Active when fabric_type is rackplane.
           x-field-uid: 3
 
     RackPlaneHost:
