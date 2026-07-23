@@ -1,6 +1,6 @@
 components:
   schemas:
-    Config.Generate:
+    Config.Generate.Request:
       description: |-
         A configuration that describes a set of new resources to be generated.
       type: object
@@ -16,27 +16,6 @@ components:
         ai_workload:
           description: |-
             A description of the infrastructure that the AI workload will run on.
-          $ref: '#/components/schemas/AiWorkload.Generate'
+          $ref: '../ai_workload/generate.yaml#/components/schemas/AiWorkload.Config.Generate.Request'
           x-field-uid: 2
 
-    AiWorkload.Generate:
-      description: |-
-        An intermediate object to select what portion of an AiWorkload to generate
-      type: object
-      required:
-        - choice
-      properties:
-        choice:
-          type: string
-          x-enum:
-            infrastructure_binding:
-              x-field-uid: 1
-          x-field-uid: 1
-        infrastructure_binding:
-          $ref: '../ai_workload/ai_workload.yaml#/components/schemas/LogicalInfrastructure'
-          description: |-
-            The logical infrastructure configuration for the AI workload. 
-            Generates low level ports, l1settings, devices, and a partially populated
-            ai_workload in the config. The generated config be further customized by using
-            get_config, modifying the returned config, and calling set_config to update it.
-          x-field-uid: 2

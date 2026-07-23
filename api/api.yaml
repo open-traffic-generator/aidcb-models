@@ -120,7 +120,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../config/generate.yaml#/components/schemas/Config.Generate'
+              $ref: '../config/generate.yaml#/components/schemas/Config.Generate.Request'
       responses:
         '200':
           $ref: '../result/request.yaml#/components/responses/Success'

@@ -1,0 +1,55 @@
+components:
+  schemas:
+
+    AiWorkload.Config.Generate.Request:
+      description: |-
+        An intermediate object to select what portion of an AiWorkload to generate
+      type: object
+      required:
+        - choice
+      properties:
+        choice:
+          type: string
+          x-enum:
+            infrastructure_binding:
+              x-field-uid: 1
+          x-field-uid: 1
+        infrastructure_binding:
+          $ref: '#/components/schemas/AiWorkload.Binding.Generate.Request'
+          description: |-
+            The logical infrastructure configuration for the AI workload.
+            Generates low level ports, l1settings, devices, and a partially populated
+            ai_workload in the config. The generated config be further customized by using
+            get_config, modifying the returned config, and calling set_config to update it.
+          x-field-uid: 2
+
+    # Copied from public_api InfrastructureProfile.
+    # Nearly identical to LogicalInfrastructure in ai_workload.yaml.
+    AiWorkload.Binding.Generate.Request:
+      description: >-
+        Logical infrastructure profile describing the emulated infrastructure topology.
+        The topology is compiled into otg configuration settings, namely:
+          /ports
+          /devices/ethernets/...
+          /layer1
+          /captures
+        If the config is not clear, this function will preserve the existing settings
+        and expand them incrementally to match the specified infrastructure.
+      type: object
+      properties:
+        name:
+          type: string
+          description: >-
+            Profile name.
+          x-field-uid: 1
+        id:
+          type: string
+          description: >-
+            System-assigned globally unique profile ID.
+          x-field-uid: 2
+        infrastructure:
+          $ref: '#/components/schemas/InfrastructureConfig'
+          description: >-
+            The infrastructure configuration for this profile.
+          x-field-uid: 3
+

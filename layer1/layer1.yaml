@@ -21,34 +21,8 @@ components:
             Set the speed if supported. When no speed is explicitly set, the current
             speed of underlying test interface shall be assumed.
           type: string
+          x-include: ./layer1.yaml#/components/schemas/Layer1.SpeedEnum/properties/value
           x-field-uid: 2
-          x-enum:
-            speed_10_fd_mbps:
-              x-field-uid: 1
-            speed_10_hd_mbps:
-              x-field-uid: 2
-            speed_100_fd_mbps:
-              x-field-uid: 3
-            speed_100_hd_mbps:
-              x-field-uid: 4
-            speed_1_gbps:
-              x-field-uid: 5
-            speed_10_gbps:
-              x-field-uid: 6
-            speed_25_gbps:
-              x-field-uid: 7
-            speed_40_gbps:
-              x-field-uid: 8
-            speed_50_gbps:
-              x-field-uid: 9
-            speed_100_gbps:
-              x-field-uid: 10
-            speed_200_gbps:
-              x-field-uid: 11
-            speed_400_gbps:
-              x-field-uid: 12
-            speed_800_gbps:
-              x-field-uid: 13
         media:
           description: |-
             Set the type of media for test interface if supported. When no media
@@ -142,6 +116,43 @@ components:
               x-field-uid: 2
             rs_fec_kp4:
               x-field-uid: 3
+    Layer1.SpeedEnum:
+      description: |-
+        Holder for the canonical Ethernet interface speed enum. Not a schema in
+        the bundled artifacts; the value property is merged inline wherever it
+        is included via x-include.
+      type: object
+      properties:
+        value:
+          type: string
+          x-field-uid: 1
+          x-enum:
+            speed_10_fd_mbps:
+              x-field-uid: 1
+            speed_10_hd_mbps:
+              x-field-uid: 2
+            speed_100_fd_mbps:
+              x-field-uid: 3
+            speed_100_hd_mbps:
+              x-field-uid: 4
+            speed_1_gbps:
+              x-field-uid: 5
+            speed_10_gbps:
+              x-field-uid: 6
+            speed_25_gbps:
+              x-field-uid: 7
+            speed_40_gbps:
+              x-field-uid: 8
+            speed_50_gbps:
+              x-field-uid: 9
+            speed_100_gbps:
+              x-field-uid: 10
+            speed_200_gbps:
+              x-field-uid: 11
+            speed_400_gbps:
+              x-field-uid: 12
+            speed_800_gbps:
+              x-field-uid: 13
     Layer1.AutoNegotiation:
       description: |-
         Configuration for auto negotiation settings

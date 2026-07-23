@@ -14660,9 +14660,8 @@ message FileInfo {
 // topology.
 message AiWorkloadBindings {
 
-  // Custom binding that maps ranks to NPUs, configures NIC settings, and assigns physical
-  // test resources.
-  CustomBinding custom_binding = 1;
+  // Comprehensive bindings that map ranks to NPUs,  and assigns physical test resources.
+  DetailedBindings detailed_bindings = 1;
 
   // A copy of the logical infrastructure used when the binding was created. Allows trials
   // to be re-run with the original version of the logical infrastructure.
@@ -14740,74 +14739,21 @@ message PlatformConfig {
   // The name of this platform
   optional string name = 1;
 
-  message Choice {
-    enum Enum {
-      unspecified = 0;
-      keysight_nccl_test = 1;
-      keysight_sw = 2;
-      keysight_hw = 3;
-      custom = 4;
-      keysight_scp_sim = 5;
-    }
-  }
-  // The platform type to use for this trial run. unspecified: platform is not set; the
-  // server applies its default. keysight_nccl_test: Keysight NCCL test platform. keysight_sw:
-  // Keysight software simulation platform. keysight_hw: Keysight hardware platform (default
-  // for most trials). custom: custom or third-party platform; use PhysicalBindingConfig.custom_settings
-  // for binding parameters. keysight_scp_sim: Keysight SCP simulation platform.
-  optional Choice.Enum choice = 2;
+  // The platform type to use for this trial run. To avoid requiring a schema update to
+  // support new types of platform, the value is just a string, not an enum. The implementation
+  // must validate. (Note: this property cannot be named choice — openapiart reserves
+  // that name for enum-backed choice properties.) unspecified: platform is not set; the
+  // server applies its default. Initial keysight-supported platforms:
+  // keysight_nccl_test: Keysight NCCL test platform.
+  // keysight_sw: Keysight software simulation platform.
+  // keysight_hw: Keysight hardware platform (default for most trials).
+  // keysight_scp_sim: Keysight SCP simulation platform.
+  // default = unspecified
+  optional string platform_type = 2;
 
-  // Generic key/value platform settings. May be used by all platforms for testing purposes.
-  // For platform=custom, this is the primary platform configuration — pass all vendor-specific
-  // parameters here.
-  StringMap custom_settings = 3;
-
-  // Configuration specific to the Keysight NCCL test platform.
-  KeysightNcclTestConfig keysight_nccl_test = 4;
-
-  // Configuration specific to the Keysight software agent platform.
-  KeysightSwConfig keysight_sw = 5;
-
-  // Configuration specific to the Keysight hardware platform.
-  KeysightHwConfig keysight_hw = 6;
-
-  // Configuration for a custom or third-party platform. Use PhysicalBindingConfig.custom_settings
-  // for per-binding parameters.
-  CustomPlatformConfig custom = 7;
-
-  // Configuration specific to the Keysight SCP simulation platform.
-  KeysightScpSimConfig keysight_scp_sim = 8;
-}
-
-// Configuration for the Keysight NCCL test platform.
-message KeysightNcclTestConfig {
-
-  // NCCL environment variable overrides as name/value pairs.
-  StringMap nccl_env_vars = 1;
-}
-
-// Strongly-typed configuration for the Keysight software agent platform. Placeholder
-// — parameters will be added as requirements are identified.
-message KeysightSwConfig {
-}
-
-// Strongly-typed configuration for the Keysight hardware platform. Placeholder — parameters
-// will be added as requirements are identified.
-message KeysightHwConfig {
-}
-
-// Configuration for a custom or third-party platform. Allows any vendor to implement
-// the CCB API without requiring schema changes. Platform-level key/value settings go
-// in PlatformConfig.custom_settings; per-binding settings go in PhysicalBindingConfig.custom_settings.
-message CustomPlatformConfig {
-
-  // Identifies the platform vendor or implementation. Informational only.
-  optional string vendor = 1;
-}
-
-// Strongly-typed configuration for the Keysight SCP simulation platform. Placeholder
-// — parameters will be added as requirements are identified.
-message KeysightScpSimConfig {
+  // Generic properties string key/arbitrary value platform settings.  May be used by
+  // all platforms. Assign all vendor-specific parameters here.
+  StringMap settings = 3;
 }
 
 // CCB benchmark configuration. Defines a collective communication test.
@@ -15197,8 +15143,24 @@ message InfraRef {
   optional int32 component_index = 4;
 }
 
+// Maps logical infrastructure to physical infrastructure
+message DetailedBindings {
+
+  message Choice {
+    enum Enum {
+      unspecified = 0;
+      standard_bindings = 1;
+    }
+  }
+  // The specific type of bindings to use
+  optional Choice.Enum choice = 1;
+
+  // Description missing in models
+  StandardBindings standard_bindings = 2;
+}
+
 // Maps ranks to logical NPUs, configures NIC settings, and assigns physical test resources.
-message CustomBinding {
+message StandardBindings {
 
   // List of bindings that map each rank to a specific logical NPU and its available NICs.
   repeated RankBinding rank_bindings = 1;
@@ -15271,37 +15233,10 @@ message PhysicalBinding {
 // is used.
 message PhysicalBindingConfig {
 
-  // Generic key/value settings for this physical binding. May be used by all platforms
-  // for testing purposes. For platform=custom, this is the primary binding configuration
-  // — pass all vendor-specific binding parameters here.
+  // Generic properties for this physical binding. May be used by all platforms for testing
+  // purposes. For platform=custom, this is the primary binding configuration — pass all
+  // vendor-specific binding parameters here.
   StringMap custom_settings = 1;
-
-  // Binding settings specific to the Keysight NCCL test platform.
-  BindingKeysightNcclTestConfig keysight_nccl_test = 2;
-
-  // Binding settings specific to the Keysight software agent platform.
-  BindingKeysightSwConfig keysight_sw = 3;
-
-  // Binding settings specific to the Keysight hardware platform.
-  BindingKeysightHwConfig keysight_hw = 4;
-}
-
-// Physical binding settings for the Keysight hardware platform. Placeholder — chassis
-// location moved to Port.location; layer1 and capture settings moved to the OTG layer1
-// and captures sections (see aiworkload-transport-migration.md).
-message BindingKeysightHwConfig {
-}
-
-// Physical binding settings for the Keysight software agent platform. Placeholder —
-// server location moved to Port.location; layer1 and capture settings moved to the
-// OTG layer1 and captures sections (see aiworkload-transport-migration.md).
-message BindingKeysightSwConfig {
-}
-
-// Physical binding settings for the Keysight NCCL test platform. Placeholder — server
-// location moved to Port.location; layer1 and capture settings moved to the OTG layer1
-// and captures sections (see aiworkload-transport-migration.md).
-message BindingKeysightNcclTestConfig {
 }
 
 // Assigns a platform to a region within the infrastructure.
@@ -15508,31 +15443,47 @@ message RackPlaneFabric {
   message ScaleOutSwitchSpeed {
     enum Enum {
       unspecified = 0;
-      speed_100g = 1;
-      speed_200g = 2;
-      speed_400g = 3;
-      speed_800g = 4;
+      speed_10_fd_mbps = 1;
+      speed_10_hd_mbps = 2;
+      speed_100_fd_mbps = 3;
+      speed_100_hd_mbps = 4;
+      speed_1_gbps = 5;
+      speed_10_gbps = 6;
+      speed_25_gbps = 7;
+      speed_40_gbps = 8;
+      speed_50_gbps = 9;
+      speed_100_gbps = 10;
+      speed_200_gbps = 11;
+      speed_400_gbps = 12;
+      speed_800_gbps = 13;
     }
   }
-  // Ethernet speed for inter-rack communication via scale-out switches. Default is speed_800g.
-  // speed_100g: 100 Gigabit Ethernet. speed_200g: 200 Gigabit Ethernet. speed_400g: 400
-  // Gigabit Ethernet. speed_800g: 800 Gigabit Ethernet.
-  // default = ScaleOutSwitchSpeed.Enum.speed_800g
+  // Ethernet speed for inter-rack communication via scale-out switches. Default is speed_800_gbps.
+  // Speeds not supported by the assigned platform are rejected at validation time.
+  // default = ScaleOutSwitchSpeed.Enum.speed_800_gbps
   optional ScaleOutSwitchSpeed.Enum scale_out_switch_speed = 3;
 
   message ScaleUpSwitchSpeed {
     enum Enum {
       unspecified = 0;
-      speed_100g = 1;
-      speed_200g = 2;
-      speed_400g = 3;
-      speed_800g = 4;
+      speed_10_fd_mbps = 1;
+      speed_10_hd_mbps = 2;
+      speed_100_fd_mbps = 3;
+      speed_100_hd_mbps = 4;
+      speed_1_gbps = 5;
+      speed_10_gbps = 6;
+      speed_25_gbps = 7;
+      speed_40_gbps = 8;
+      speed_50_gbps = 9;
+      speed_100_gbps = 10;
+      speed_200_gbps = 11;
+      speed_400_gbps = 12;
+      speed_800_gbps = 13;
     }
   }
-  // Ethernet speed for intra-rack communication on the scale-up network. Default is speed_800g.
-  // speed_100g: 100 Gigabit Ethernet. speed_200g: 200 Gigabit Ethernet. speed_400g: 400
-  // Gigabit Ethernet. speed_800g: 800 Gigabit Ethernet.
-  // default = ScaleUpSwitchSpeed.Enum.speed_800g
+  // Ethernet speed for intra-rack communication on the scale-up network. Default is speed_800_gbps.
+  // Speeds not supported by the assigned platform are rejected at validation time.
+  // default = ScaleUpSwitchSpeed.Enum.speed_800_gbps
   optional ScaleUpSwitchSpeed.Enum scale_up_switch_speed = 4;
 }
 
@@ -15541,10 +15492,6 @@ message BlackboxFabric {
 
   // Fabric name.
   optional string name = 1;
-}
-
-// A map of string keys to string values.
-message StringMap {
 }
 
 // AiWorkloadConfig contains all the information about an AiWorkload configuration to
@@ -15599,6 +15546,33 @@ message AiWorkloadInfo {
   // The version of the trial config.
   // Semver (semantic versioning) formatted version of containing object.
   optional string config_version = 3;
+}
+
+// A empty container that is used to indicate a null choice.
+message ChoiceNone {
+}
+
+// An object that supports pagination for list operations.
+message PaginatedObject {
+
+  // Limit for list pagination.
+  // default = 20
+  optional int32 limit = 1;
+
+  // Offset for list pagination.
+  // default = 0
+  optional int32 offset = 2;
+}
+
+// A placeholder object for fields that are yet to be properly defined.
+message PlaceholderObject {
+
+  // Placeholder type for fields that are yet to be defined.
+  optional string value = 1;
+}
+
+// A map of string keys to string values.
+message StringMap {
 }
 
 // Port specific configurations.
@@ -16255,7 +16229,7 @@ message ConfigDeleteResources {
 }
 
 // A configuration that describes a set of new resources to be generated.
-message ConfigGenerate {
+message ConfigGenerateRequest {
 
   message Choice {
     enum Enum {
@@ -16268,11 +16242,11 @@ message ConfigGenerate {
   optional Choice.Enum choice = 1;
 
   // A description of the infrastructure that the AI workload will run on.
-  AiWorkloadGenerate ai_workload = 2;
+  AiWorkloadConfigGenerateRequest ai_workload = 2;
 }
 
 // An intermediate object to select what portion of an AiWorkload to generate
-message AiWorkloadGenerate {
+message AiWorkloadConfigGenerateRequest {
 
   message Choice {
     enum Enum {
@@ -16288,7 +16262,27 @@ message AiWorkloadGenerate {
   // Generates low level ports, l1settings, devices, and a partially populated
   // ai_workload in the config. The generated config be further customized by using
   // get_config, modifying the returned config, and calling set_config to update it.
-  LogicalInfrastructure infrastructure_binding = 2;
+  AiWorkloadBindingGenerateRequest infrastructure_binding = 2;
+}
+
+// Logical infrastructure profile describing the emulated infrastructure topology. The
+// topology is compiled into otg configuration settings, namely:
+// /ports
+// /devices/ethernets/...
+// /layer1
+// /captures
+// If the config is not clear, this function will preserve the existing settings and
+// expand them incrementally to match the specified infrastructure.
+message AiWorkloadBindingGenerateRequest {
+
+  // Profile name.
+  optional string name = 1;
+
+  // System-assigned globally unique profile ID.
+  optional string id = 2;
+
+  // The infrastructure configuration for this profile.
+  InfrastructureConfig infrastructure = 3;
 }
 
 // Request for setting operational state of configured resources.
@@ -39690,7 +39684,7 @@ message DeleteConfigResponse {
 
 
 message GenerateConfigRequest {
-  ConfigGenerate config_generate = 1;
+  ConfigGenerateRequest config_generate_request = 1;
 }
 message GenerateConfigResponse {
   Warning warning = 1;

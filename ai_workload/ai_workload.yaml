@@ -18,7 +18,7 @@ components:
 
 
 #
-# Warning!!!: AiWorkloadBindings are still in progress. Do not implement any converters for this object or its children
+# Warning!!!: AiWorkloadBindings is still in progress. Do not implement any converters for this object or its children
 #
     AiWorkloadBindings:
       description: >-
@@ -26,10 +26,10 @@ components:
         to the topology.
       type: object
       properties:
-        custom_binding:
-          $ref: '#/components/schemas/CustomBinding'
+        detailed_bindings:
+          $ref: '#/components/schemas/DetailedBindings'
           description: >-
-            Custom binding that maps ranks to NPUs, configures NIC settings,
+            Comprehensive bindings that map ranks to NPUs, 
             and assigns physical test resources.
           x-field-uid: 1
         logical_infrastructure:
@@ -145,104 +145,29 @@ components:
             The name of this platform
           type: string
           x-field-uid: 1
-        choice:
+        platform_type:
           type: string
+          default: "unspecified"
           description: >-
             The platform type to use for this trial run.
+            To avoid requiring a schema update to support new types of platform,
+            the value is just a string, not an enum. The implementation must validate.
+            (Note: this property cannot be named "choice" — openapiart reserves
+            that name for enum-backed choice properties.)
             unspecified: platform is not set; the server applies its default.
-            keysight_nccl_test: Keysight NCCL test platform.
-            keysight_sw: Keysight software simulation platform.
-            keysight_hw: Keysight hardware platform (default for most trials).
-            custom: custom or third-party platform; use PhysicalBindingConfig.custom_settings for binding parameters.
-            keysight_scp_sim: Keysight SCP simulation platform.
+            Initial keysight-supported platforms:
+              keysight_nccl_test: Keysight NCCL test platform.
+              keysight_sw: Keysight software simulation platform.
+              keysight_hw: Keysight hardware platform (default for most trials).
+              keysight_scp_sim: Keysight SCP simulation platform.
           x-field-uid: 2
-          x-enum:
-            keysight_nccl_test:
-              x-field-uid: 1
-            keysight_sw:
-              x-field-uid: 2
-            keysight_hw:
-              x-field-uid: 3
-            custom:
-              x-field-uid: 4
-            keysight_scp_sim:
-              x-field-uid: 5
-        custom_settings:
-          $ref: '#/components/schemas/StringMap'
+        settings:
+          $ref: '../common/common.yaml#/components/schemas/StringMap'
           description: >-
-            Generic key/value platform settings. May be used by all platforms
-            for testing purposes. For platform=custom, this is the primary
-            platform configuration — pass all vendor-specific parameters here.
+            Generic properties string key/arbitrary value platform settings. 
+            May be used by all platforms.
+            Assign all vendor-specific parameters here.
           x-field-uid: 3
-        keysight_nccl_test:
-          $ref: '#/components/schemas/KeysightNcclTestConfig'
-          description: >-
-            Configuration specific to the Keysight NCCL test platform.
-          x-field-uid: 4
-        keysight_sw:
-          $ref: '#/components/schemas/KeysightSwConfig'
-          description: >-
-            Configuration specific to the Keysight software agent platform.
-          x-field-uid: 5
-        keysight_hw:
-          $ref: '#/components/schemas/KeysightHwConfig'
-          description: >-
-            Configuration specific to the Keysight hardware platform.
-          x-field-uid: 6
-        custom:
-          $ref: '#/components/schemas/CustomPlatformConfig'
-          description: >-
-            Configuration for a custom or third-party platform. Use
-            PhysicalBindingConfig.custom_settings for per-binding parameters.
-          x-field-uid: 7
-        keysight_scp_sim:
-          $ref: '#/components/schemas/KeysightScpSimConfig'
-          description: >-
-            Configuration specific to the Keysight SCP simulation platform.
-          x-field-uid: 8
-
-    KeysightNcclTestConfig:
-      description: >-
-        Configuration for the Keysight NCCL test platform.
-      type: object
-      properties:
-        nccl_env_vars:
-          $ref: '#/components/schemas/StringMap'
-          description: >-
-            NCCL environment variable overrides as name/value pairs.
-          x-field-uid: 1
-
-    KeysightSwConfig:
-      description: >-
-        Strongly-typed configuration for the Keysight software agent platform.
-        Placeholder — parameters will be added as requirements are identified.
-      type: object
-
-    KeysightHwConfig:
-      description: >-
-        Strongly-typed configuration for the Keysight hardware platform.
-        Placeholder — parameters will be added as requirements are identified.
-      type: object
-
-    CustomPlatformConfig:
-      description: >-
-        Configuration for a custom or third-party platform. Allows any vendor
-        to implement the CCB API without requiring schema changes. Platform-level
-        key/value settings go in PlatformConfig.custom_settings; per-binding
-        settings go in PhysicalBindingConfig.custom_settings.
-      type: object
-      properties:
-        vendor:
-          type: string
-          description: >-
-            Identifies the platform vendor or implementation. Informational only.
-          x-field-uid: 1
-
-    KeysightScpSimConfig:
-      description: >-
-        Strongly-typed configuration for the Keysight SCP simulation platform.
-        Placeholder — parameters will be added as requirements are identified.
-      type: object
 
     CcbBenchmark:
       description: >-
@@ -348,30 +273,16 @@ components:
             List of data sizes in bytes. Default [1073741824] (1 GiB).
           x-field-uid: 1
 
-    Algorithm:
+    CollectiveAlgorithmEnum:
       description: >-
-        Specifies a collective communication algorithm — either a system-provided
-        implementation or a custom user-provided one.
+        Holder for the collective communication algorithm enum. Not a schema in
+        the bundled artifacts; the value property is merged inline wherever it
+        is included via x-include.
       type: object
       properties:
-        algorithm_category:
+        value:
           type: string
-          default: system
-          description: >-
-            Selects whether to use a system-provided or custom algorithm. Default is system.
           x-field-uid: 1
-          x-enum:
-            system:
-              x-field-uid: 1
-            custom:
-              x-field-uid: 2
-        system:
-          type: string
-          default: all_to_all_parallel
-          description: >-
-            A system-supplied collective algorithm. Active when algorithm_category is system.
-            Default is all_to_all_parallel. _pp suffix variants are MSCCL++ implementations.
-          x-field-uid: 2
           x-enum:
             all_to_all_parallel:
               x-field-uid: 1
@@ -403,6 +314,32 @@ components:
               x-field-uid: 14
             all_reduce_vector_halving_doubling_pp:
               x-field-uid: 15
+
+    Algorithm:
+      description: >-
+        Specifies a collective communication algorithm — either a system-provided
+        implementation or a custom user-provided one.
+      type: object
+      properties:
+        algorithm_category:
+          type: string
+          default: system
+          description: >-
+            Selects whether to use a system-provided or custom algorithm. Default is system.
+          x-field-uid: 1
+          x-enum:
+            system:
+              x-field-uid: 1
+            custom:
+              x-field-uid: 2
+        system:
+          type: string
+          default: all_to_all_parallel
+          description: >-
+            A system-supplied collective algorithm. Active when algorithm_category is system.
+            Default is all_to_all_parallel. _pp suffix variants are MSCCL++ implementations.
+          x-include: ./ai_workload.yaml#/components/schemas/CollectiveAlgorithmEnum/properties/value
+          x-field-uid: 2
         custom:
           type: string
           description: >-
@@ -525,38 +462,8 @@ components:
           description: >-
             The communication algorithm used for collective operations on this channel.
             _pp suffix variants are MSCCL++ implementations.
+          x-include: ./ai_workload.yaml#/components/schemas/CollectiveAlgorithmEnum/properties/value
           x-field-uid: 1
-          x-enum:
-            all_to_all_parallel:
-              x-field-uid: 1
-            all_to_all_pxn:
-              x-field-uid: 2
-            all_reduce_unidirectional_ring:
-              x-field-uid: 3
-            all_reduce_bidirectional_ring:
-              x-field-uid: 4
-            all_reduce_vector_halving_doubling:
-              x-field-uid: 5
-            all_reduce_double_binary_tree:
-              x-field-uid: 6
-            all_gather_ring:
-              x-field-uid: 7
-            reduce_scatter_ring:
-              x-field-uid: 8
-            broadcast_parallel:
-              x-field-uid: 9
-            gather_parallel:
-              x-field-uid: 10
-            all_to_all_parallel_pp:
-              x-field-uid: 11
-            all_to_all_pxn_pp:
-              x-field-uid: 12
-            all_reduce_unidirectional_ring_pp:
-              x-field-uid: 13
-            all_reduce_bidirectional_ring_pp:
-              x-field-uid: 14
-            all_reduce_vector_halving_doubling_pp:
-              x-field-uid: 15
         rank_distribution:
           $ref: '#/components/schemas/RankDistribution'
           description: >-
@@ -837,7 +744,24 @@ components:
             Zero-based component index.
           x-field-uid: 4
 
-    CustomBinding:
+    DetailedBindings:
+      description: |-
+        Maps logical infrastructure to physical infrastructure
+      type: object
+      properties:
+        choice:
+          type: string
+          description: |-
+            The specific type of bindings to use
+          x-field-uid: 1
+          x-enum:
+            standard_bindings:
+              x-field-uid: 1
+        standard_bindings:
+          $ref: '#/components/schemas/StandardBindings'
+          x-field-uid: 2
+
+    StandardBindings:
       description: >-
         Maps ranks to logical NPUs, configures NIC settings, and assigns physical test resources.
       type: object
@@ -952,58 +876,13 @@ components:
       type: object
       properties:
         custom_settings:
-          $ref: '#/components/schemas/StringMap'
+          $ref: '../common/common.yaml#/components/schemas/StringMap'
           description: >-
-            Generic key/value settings for this physical binding.
+            Generic properties for this physical binding.
             May be used by all platforms for testing purposes.
             For platform=custom, this is the primary binding
             configuration — pass all vendor-specific binding parameters here.
           x-field-uid: 1
-        keysight_nccl_test:
-          $ref: '#/components/schemas/BindingKeysightNcclTestConfig'
-          description: Binding settings specific to the Keysight NCCL test platform.
-          x-field-uid: 2
-        keysight_sw:
-          $ref: '#/components/schemas/BindingKeysightSwConfig'
-          description: Binding settings specific to the Keysight software agent platform.
-          x-field-uid: 3
-        keysight_hw:
-          $ref: '#/components/schemas/BindingKeysightHwConfig'
-          description: Binding settings specific to the Keysight hardware platform.
-          x-field-uid: 4
-
-    BindingKeysightHwConfig:
-      description: >-
-        Physical binding settings for the Keysight hardware platform.
-        Placeholder — chassis location moved to Port.location; layer1 and
-        capture settings moved to the OTG layer1 and captures sections
-        (see aiworkload-transport-migration.md).
-      type: object
-      # x-field-uid 1 retired (chassis_location — moved to Port.location)
-      # x-field-uid 2 retired (layer1 — moved to OTG Layer1)
-      # x-field-uid 3 retired (capture — moved to OTG Capture)
-
-    BindingKeysightSwConfig:
-      description: >-
-        Physical binding settings for the Keysight software agent platform.
-        Placeholder — server location moved to Port.location; layer1 and
-        capture settings moved to the OTG layer1 and captures sections
-        (see aiworkload-transport-migration.md).
-      type: object
-      # x-field-uid 1 retired (server_location — moved to Port.location)
-      # x-field-uid 2 retired (layer1 — moved to OTG Layer1)
-      # x-field-uid 3 retired (capture — moved to OTG Capture)
-
-    BindingKeysightNcclTestConfig:
-      description: >-
-        Physical binding settings for the Keysight NCCL test platform.
-        Placeholder — server location moved to Port.location; layer1 and
-        capture settings moved to the OTG layer1 and captures sections
-        (see aiworkload-transport-migration.md).
-      type: object
-      # x-field-uid 1 retired (server_location — moved to Port.location)
-      # x-field-uid 2 retired (layer1 — moved to OTG Layer1)
-      # x-field-uid 3 retired (capture — moved to OTG Capture)
 
 # Network-stack schemas (ChassisInfo, ServerInfo, Layer1, NicSettings,
 # NicIpAddressing, NicTransport, Ipv4Addressing, Ipv6Addressing, Vlan, VlanTag,
@@ -1321,45 +1200,21 @@ components:
             Number of hosts per rack.
           x-field-uid: 2
         scale_out_switch_speed:
-          type: string
-          default: speed_800g
+          default: speed_800_gbps
           description: >-
             Ethernet speed for inter-rack communication via scale-out switches.
-            Default is speed_800g.
-            speed_100g: 100 Gigabit Ethernet.
-            speed_200g: 200 Gigabit Ethernet.
-            speed_400g: 400 Gigabit Ethernet.
-            speed_800g: 800 Gigabit Ethernet.
+            Default is speed_800_gbps. Speeds not supported by the assigned
+            platform are rejected at validation time.
+          x-include: ../layer1/layer1.yaml#/components/schemas/Layer1.SpeedEnum/properties/value
           x-field-uid: 3
-          x-enum:
-            speed_100g:
-              x-field-uid: 1
-            speed_200g:
-              x-field-uid: 2
-            speed_400g:
-              x-field-uid: 3
-            speed_800g:
-              x-field-uid: 4
         scale_up_switch_speed:
-          type: string
-          default: speed_800g
+          default: speed_800_gbps
           description: >-
             Ethernet speed for intra-rack communication on the scale-up network.
-            Default is speed_800g.
-            speed_100g: 100 Gigabit Ethernet.
-            speed_200g: 200 Gigabit Ethernet.
-            speed_400g: 400 Gigabit Ethernet.
-            speed_800g: 800 Gigabit Ethernet.
+            Default is speed_800_gbps. Speeds not supported by the assigned
+            platform are rejected at validation time.
+          x-include: ../layer1/layer1.yaml#/components/schemas/Layer1.SpeedEnum/properties/value
           x-field-uid: 4
-          x-enum:
-            speed_100g:
-              x-field-uid: 1
-            speed_200g:
-              x-field-uid: 2
-            speed_400g:
-              x-field-uid: 3
-            speed_800g:
-              x-field-uid: 4
 
     BlackboxFabric:
       description: >-
@@ -1371,13 +1226,6 @@ components:
           description: >-
             Fabric name.
           x-field-uid: 1
-
-    StringMap:
-      description: >-
-        A map of string keys to string values.
-      type: object
-      additionalProperties:
-        type: string
 
 #
 # Warning!!!: The AiWorkload is still in progress. Do not implement any converters for this object or its children

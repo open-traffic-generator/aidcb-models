@@ -105,3 +105,9 @@ components:
             Semver (semantic versioning) formatted version of containing object.
           x-field-uid: 1
 
+    StringMap:
+      description: >-
+        A map of string keys to string values.
+      type: object
+      additionalProperties:
+        type: string
