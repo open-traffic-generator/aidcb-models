@@ -48,7 +48,7 @@ components:
             System-assigned globally unique profile ID.
           x-field-uid: 2
         infrastructure:
-          $ref: '#/components/schemas/InfrastructureConfig'
+          $ref: './ai_workload.yaml#/components/schemas/InfrastructureConfig'
           description: >-
             The infrastructure configuration for this profile.
           x-field-uid: 3
