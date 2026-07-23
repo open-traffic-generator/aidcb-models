@@ -104,27 +104,6 @@ components:
             generic link attached to a single generic switch.
           x-field-uid: 3
 
-    InfrastructureFabric:
-      description: >-
-        Describes the overall fabric topology.
-      type: object
-      properties:
-        choice:
-          type: string
-          default: blackbox
-          x-field-uid: 1
-          x-enum:
-            blackbox:
-              x-field-uid: 1
-            rackplane:
-              x-field-uid: 2
-        blackbox:
-          $ref: '#/components/schemas/BlackboxFabric'
-          x-field-uid: 2
-        rackplane:
-          $ref: '#/components/schemas/RackPlaneFabric'
-          x-field-uid: 3
-
     RackPlaneHost:
       description: >-
         Host type intended for use with a rackplane fabric topology.
@@ -160,6 +139,38 @@ components:
           description: >-
             Number of NICs connected to the scale-out network per host.
           x-field-uid: 4
+
+    InfrastructureFabric:
+      description: >-
+        Describes the overall fabric topology.
+      type: object
+      properties:
+        choice:
+          type: string
+          default: blackbox
+          x-field-uid: 1
+          x-enum:
+            blackbox:
+              x-field-uid: 1
+            rackplane:
+              x-field-uid: 2
+        blackbox:
+          $ref: '#/components/schemas/BlackboxFabric'
+          x-field-uid: 2
+        rackplane:
+          $ref: '#/components/schemas/RackPlaneFabric'
+          x-field-uid: 3
+
+    BlackboxFabric:
+      description: >-
+        A fabric where the internal topology is not modeled.
+      type: object
+      properties:
+        name:
+          type: string
+          description: >-
+            Fabric name.
+          x-field-uid: 1
 
     RackPlaneFabric:
       description: >-
@@ -225,14 +236,3 @@ components:
               x-field-uid: 3
             speed_800g:
               x-field-uid: 4
-
-    BlackboxFabric:
-      description: >-
-        A fabric where the internal topology is not modeled.
-      type: object
-      properties:
-        name:
-          type: string
-          description: >-
-            Fabric name.
-          x-field-uid: 1
