@@ -33,7 +33,7 @@ components:
               x-field-uid: 1
           x-field-uid: 1
         infrastructure_binding:
-          $ref: '../ai_workload/ai_workload.yaml#/components/schemas/LogicalInfrastructure'
+          $ref: '../ai_workload/logical_infrastructure.yaml#/components/schemas/LogicalInfrastructure'
           description: |-
             The logical infrastructure configuration for the AI workload. 
             Generates low level ports, l1settings, devices, and a partially populated
