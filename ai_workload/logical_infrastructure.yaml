@@ -92,9 +92,6 @@ components:
         generic:
           $ref: '#/components/schemas/GenericHost'
           x-field-uid: 2
-        rackplane:
-          $ref: '#/components/schemas/RackPlaneHost'
-          x-field-uid: 3
         use_npu_interconnect:
           type: boolean
           default: false
@@ -102,7 +99,7 @@ components:
             Emulate data transfer over NPU-to-NPU links within each host.
             When true, data transfers between interconnected ranks within
             a host are emulated.
-          x-field-uid: 4
+          x-field-uid: 3
 
     GenericHost:
       description: >-
@@ -113,7 +110,7 @@ components:
         name:
           type: string
           description: >-
-            The name of this generic host instance.
+            The name of this host instance.
           x-field-uid: 1
         npu_count:
           type: integer
@@ -129,42 +126,6 @@ components:
             NPU interconnect linking NPUs within the host. If unset, NPUs are
             not connected.
           x-field-uid: 3
-
-    RackPlaneHost:
-      description: >-
-        Host type intended for use with a rackplane fabric topology.
-        Each host connects to each fabric plane with dedicated scale-up NICs.
-      type: object
-      properties:
-        name:
-          type: string
-          description: >-
-            The name of this rack-plane host instance.
-          x-field-uid: 1
-        npu_count:
-          type: integer
-          default: 1
-          minimum: 1
-          maximum: 8
-          description: >-
-            Number of NPUs per host.
-          x-field-uid: 2
-        scale_up_nic_count:
-          type: integer
-          default: 4
-          minimum: 1
-          maximum: 64
-          description: >-
-            Number of NICs connected to the scale-up network per host.
-          x-field-uid: 3
-        scale_out_nic_count:
-          type: integer
-          default: 0
-          minimum: 0
-          maximum: 64
-          description: >-
-            Number of NICs connected to the scale-out network per host.
-          x-field-uid: 4
 
     InfrastructureFabric:
       description: >-
@@ -184,6 +145,8 @@ components:
           $ref: '#/components/schemas/BlackboxFabric'
           x-field-uid: 2
         rackplane:
+          x-status:
+            status: under-review
           $ref: '#/components/schemas/RackPlaneFabric'
           x-field-uid: 3
 
@@ -199,11 +162,18 @@ components:
           x-field-uid: 1
 
     RackPlaneFabric:
+      x-status:
+        status: under-review
       description: >-
-        Multi-plane rack fabric topology. The number of rack switches for
-        intra-rack communication is driven by RackPlaneHost.scale_up_nic_count.
+        Multi-plane rack fabric topology.
+        
+        Each host connects to each fabric plane with dedicated scale-up NICs.
+        
+        The number of rack switches for intra-rack communication is driven by
+        scale_up_nic_count_per_host.
+
         The number of scale-out switches for inter-rack communication is driven
-        by rack_count, RackPlaneHost.scale_out_nic_count, and hosts_per_rack.
+        by rack_count, scale_out_nic_count_per_host, and hosts_per_rack.
       type: object
       properties:
         rack_count:
@@ -222,16 +192,32 @@ components:
           description: >-
             Number of hosts per rack.
           x-field-uid: 2
+        scale_out_nic_count_per_host:
+          type: integer
+          default: 0
+          minimum: 0
+          maximum: 64
+          description: >-
+            Number of NICs connected to the scale-out network per host.
+          x-field-uid: 3
         scale_out_switch_speed:
           $ref: '#/components/schemas/EthernetSpeed'
           description: >-
             Ethernet speed for inter-rack communication via scale-out switches.
-          x-field-uid: 3
+          x-field-uid: 4
+        scale_up_nic_count_per_host:
+          type: integer
+          default: 4
+          minimum: 1
+          maximum: 64
+          description: >-
+            Number of NICs connected to the scale-up network per host.
+          x-field-uid: 5
         scale_up_switch_speed:
           $ref: '#/components/schemas/EthernetSpeed'
           description: >-
             Ethernet speed for intra-rack communication on the scale-up network.
-          x-field-uid: 4
+          x-field-uid: 6
 
     EthernetSpeed:
       description: >-
