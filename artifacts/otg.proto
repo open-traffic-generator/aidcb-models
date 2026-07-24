@@ -15378,171 +15378,6 @@ message RoundRobinStrategy {
 message CustomStrategy {
 }
 
-// Logical logical infrastructure describing the emulated infrastructure topology.
-message LogicalInfrastructure {
-
-  // Logical infrastructure name.
-  optional string name = 1;
-
-  // System-assigned globally unique logical infrastructure ID.
-  optional string id = 2;
-
-  // The configuration for this logical infrastructure.
-  InfrastructureConfig infrastructure = 3;
-}
-
-// Infrastructure configuration comprising hosts and the network fabric.
-message InfrastructureConfig {
-
-  // Host configuration for the infrastructure.
-  InfrastructureHost host = 1;
-
-  // Fabric topology for the infrastructure.
-  InfrastructureFabric fabric = 2;
-}
-
-// High-level host specification for the infrastructure.
-message InfrastructureHost {
-
-  // Number of hosts in the fabric.
-  // default = 4
-  optional int32 count = 1;
-
-  message HostType {
-    enum Enum {
-      unspecified = 0;
-      generic = 1;
-      rackplane = 2;
-    }
-  }
-  // The host type. Default is generic.
-  // default = HostType.Enum.generic
-  optional HostType.Enum host_type = 2;
-
-  // Generic host configuration. Active when host_type is generic.
-  GenericHost generic = 3;
-
-  // Rack-plane host configuration. Active when host_type is rackplane. Intended for use
-  // with a rackplane fabric topology.
-  RackPlaneHost rackplane = 4;
-
-  // Emulate data transfer over NPU-to-NPU links within each host. When true, data transfers
-  // between interconnected ranks within a host are emulated.
-  // default = False
-  optional bool use_npu_interconnect = 5;
-}
-
-// Generic host builder parameters. Generic hosts have a 1:1 ratio of NICs and NPUs.
-message GenericHost {
-
-  // The name of this generic host instance.
-  optional string name = 1;
-
-  // Number of Neural Processing Units (NPUs) in the host.
-  // default = 1
-  optional int32 npu_count = 2;
-
-  // NPU interconnect bandwidth within the host in Gbps. A value of 0 means no NPU-to-NPU
-  // interconnect within the host. If non-zero, each NPU within the host is interconnected
-  // via a generic link attached to a single generic switch.
-  // default = 1600
-  optional int32 npu_interconnect_bandwidth_gbps = 3;
-}
-
-// Describes the overall fabric topology.
-message InfrastructureFabric {
-
-  message FabricType {
-    enum Enum {
-      unspecified = 0;
-      blackbox = 1;
-      rackplane = 2;
-    }
-  }
-  // The type of fabric topology. Default is blackbox.
-  // default = FabricType.Enum.blackbox
-  optional FabricType.Enum fabric_type = 1;
-
-  // Non-detailed generic fabric where internal topology is not modeled. Active when fabric_type
-  // is blackbox.
-  BlackboxFabric blackbox = 2;
-
-  // Multi-plane rack fabric topology. Active when fabric_type is rackplane.
-  RackPlaneFabric rackplane = 3;
-}
-
-// Host type intended for use with a rackplane fabric topology. Each host connects to
-// each fabric plane with dedicated scale-up NICs.
-message RackPlaneHost {
-
-  // The name of this rack-plane host instance.
-  optional string name = 1;
-
-  // Number of NPUs per host.
-  // default = 1
-  optional int32 npu_count = 2;
-
-  // Number of NICs connected to the scale-up network per host.
-  // default = 4
-  optional int32 scale_up_nic_count = 3;
-
-  // Number of NICs connected to the scale-out network per host.
-  // default = 0
-  optional int32 scale_out_nic_count = 4;
-}
-
-// Multi-plane rack fabric topology. The number of rack switches for intra-rack communication
-// is driven by RackPlaneHost.scale_up_nic_count. The number of scale-out switches for
-// inter-rack communication is driven by rack_count, RackPlaneHost.scale_out_nic_count,
-// and hosts_per_rack.
-message RackPlaneFabric {
-
-  // Number of racks in the fabric.
-  // default = 1
-  optional int32 rack_count = 1;
-
-  // Number of hosts per rack.
-  // default = 1
-  optional int32 hosts_per_rack = 2;
-
-  message ScaleOutSwitchSpeed {
-    enum Enum {
-      unspecified = 0;
-      speed_100g = 1;
-      speed_200g = 2;
-      speed_400g = 3;
-      speed_800g = 4;
-    }
-  }
-  // Ethernet speed for inter-rack communication via scale-out switches. Default is speed_800g.
-  // speed_100g: 100 Gigabit Ethernet. speed_200g: 200 Gigabit Ethernet. speed_400g: 400
-  // Gigabit Ethernet. speed_800g: 800 Gigabit Ethernet.
-  // default = ScaleOutSwitchSpeed.Enum.speed_800g
-  optional ScaleOutSwitchSpeed.Enum scale_out_switch_speed = 3;
-
-  message ScaleUpSwitchSpeed {
-    enum Enum {
-      unspecified = 0;
-      speed_100g = 1;
-      speed_200g = 2;
-      speed_400g = 3;
-      speed_800g = 4;
-    }
-  }
-  // Ethernet speed for intra-rack communication on the scale-up network. Default is speed_800g.
-  // speed_100g: 100 Gigabit Ethernet. speed_200g: 200 Gigabit Ethernet. speed_400g: 400
-  // Gigabit Ethernet. speed_800g: 800 Gigabit Ethernet.
-  // default = ScaleUpSwitchSpeed.Enum.speed_800g
-  optional ScaleUpSwitchSpeed.Enum scale_up_switch_speed = 4;
-}
-
-// A fabric where the internal topology is not modeled.
-message BlackboxFabric {
-
-  // Fabric name.
-  optional string name = 1;
-}
-
 // A map of string keys to string values.
 message StringMap {
 }
@@ -16289,6 +16124,243 @@ message AiWorkloadGenerate {
   // ai_workload in the config. The generated config be further customized by using
   // get_config, modifying the returned config, and calling set_config to update it.
   LogicalInfrastructure infrastructure_binding = 2;
+}
+
+// Logical infrastructure describing the emulated infrastructure topology.
+message LogicalInfrastructure {
+
+  // Logical infrastructure name.
+  optional string name = 1;
+
+  // System-assigned globally unique logical infrastructure ID.
+  optional string id = 2;
+
+  // The configuration for this logical infrastructure.
+  // required = true
+  InfrastructureConfig infrastructure = 3;
+}
+
+// Infrastructure configuration comprising hosts and the network fabric.
+message InfrastructureConfig {
+
+  // Host configuration for the infrastructure.
+  // required = true
+  InfrastructureHosts host = 1;
+
+  // Fabric topology for the infrastructure.
+  // required = true
+  InfrastructureFabric fabric = 2;
+}
+
+// High-level host specification for the infrastructure.
+message InfrastructureHosts {
+
+  message Choice {
+    enum Enum {
+      unspecified = 0;
+      uniform = 1;
+    }
+  }
+  // Description missing in models
+  // default = Choice.Enum.uniform
+  optional Choice.Enum choice = 1;
+
+  // Description missing in models
+  InfrastructureUniformHostCollection uniform = 2;
+}
+
+// Host specification consisting of a set of N hosts fashioned after a template.
+message InfrastructureUniformHostCollection {
+
+  // Number of hosts in the fabric.
+  // default = 4
+  optional int32 count = 1;
+
+  // A host template that is instantiated multiple times to form the collection of hosts.
+  // required = true
+  InfrastructureHostTemplate template = 2;
+}
+
+// High-level single host specification for the infrastructure.
+message InfrastructureHostTemplate {
+
+  message Choice {
+    enum Enum {
+      unspecified = 0;
+      generic = 1;
+      rackplane = 2;
+    }
+  }
+  // Description missing in models
+  // default = Choice.Enum.generic
+  optional Choice.Enum choice = 1;
+
+  // Description missing in models
+  GenericHost generic = 2;
+
+  // Emulate data transfer over NPU-to-NPU links within each host. When true, data transfers
+  // between interconnected ranks within a host are emulated.
+  // default = False
+  optional bool use_npu_interconnect = 3;
+}
+
+// Generic host builder parameters. Generic hosts have a 1:1 ratio of NICs and NPUs.
+message GenericHost {
+
+  // The name of this host instance.
+  optional string name = 1;
+
+  // Number of Neural Processing Units (NPUs) in the host.
+  // default = 1
+  optional int32 npu_count = 2;
+
+  // NPU interconnect linking NPUs within the host. If unset, NPUs are not connected.
+  NPUInterconnect npu_interconnect = 3;
+}
+
+// Describes the overall fabric topology.
+message InfrastructureFabric {
+
+  message Choice {
+    enum Enum {
+      unspecified = 0;
+      blackbox = 1;
+      rackplane = 2;
+    }
+  }
+  // Description missing in models
+  // default = Choice.Enum.blackbox
+  optional Choice.Enum choice = 1;
+
+  // Description missing in models
+  BlackboxFabric blackbox = 2;
+
+  // Under Review: Information TBD
+  // 
+  // Description TBD
+  RackPlaneFabric rackplane = 3;
+}
+
+// A fabric where the internal topology is not modeled.
+message BlackboxFabric {
+
+  // Fabric name.
+  optional string name = 1;
+}
+
+// Under Review: Information TBD
+// 
+// Multi-plane rack fabric topology.
+// Each host connects to each fabric plane with dedicated scale-up NICs.
+// The number of rack switches for intra-rack communication is driven by scale_up_nic_count_per_host.
+// The number of scale-out switches for inter-rack communication is driven by rack_count,
+// scale_out_nic_count_per_host, and hosts_per_rack.
+message RackPlaneFabric {
+
+  // Number of racks in the fabric.
+  // default = 1
+  optional int32 rack_count = 1;
+
+  // Number of hosts per rack.
+  // default = 1
+  optional int32 hosts_per_rack = 2;
+
+  // Number of NICs connected to the scale-out network per host.
+  // default = 0
+  optional int32 scale_out_nic_count_per_host = 3;
+
+  // Ethernet speed for inter-rack communication via scale-out switches.
+  EthernetSpeed scale_out_switch_speed = 4;
+
+  // Number of NICs connected to the scale-up network per host.
+  // default = 4
+  optional int32 scale_up_nic_count_per_host = 5;
+
+  // Ethernet speed for intra-rack communication on the scale-up network.
+  EthernetSpeed scale_up_switch_speed = 6;
+}
+
+// An Ethernet link speed, expressed either as a standard rate or as a custom bandwidth
+// in Gbps.
+message EthernetSpeed {
+
+  message Choice {
+    enum Enum {
+      unspecified = 0;
+      standard = 1;
+      custom = 2;
+    }
+  }
+  // Description missing in models
+  // default = Choice.Enum.standard
+  optional Choice.Enum choice = 1;
+
+  message Standard {
+    enum Enum {
+      unspecified = 0;
+      speed_100gbps = 1;
+      speed_200gbps = 2;
+      speed_400gbps = 3;
+      speed_800gbps = 4;
+    }
+  }
+  // A standard Ethernet speed.
+  // default = Standard.Enum.speed_800gbps
+  optional Standard.Enum standard = 2;
+
+  // A custom Ethernet speed, in Gbps.
+  optional int32 custom = 3;
+}
+
+// High-level NPU interconnect (e.g. NVLink) properties, most importantly the bandwidth.
+message NPUInterconnect {
+
+  message Choice {
+    enum Enum {
+      unspecified = 0;
+      generic = 1;
+      nvlink = 2;
+    }
+  }
+  // Description missing in models
+  // default = Choice.Enum.generic
+  optional Choice.Enum choice = 1;
+
+  // Description missing in models
+  GenericNPUInterconnect generic = 2;
+
+  // Description missing in models
+  NVLinkInterconnect nvlink = 3;
+}
+
+// A generic NPU interconnect with a given bandwidth. Each NPU within the host is connected
+// via a generic link attached to a single generic switch.
+message GenericNPUInterconnect {
+
+  // The NPU interconnect bandwidth, in Gbps.
+  // default = 1600
+  optional int32 bandwidth_gbps = 1;
+}
+
+// Under Review: Information TBD
+// 
+// An NVLink NPU interconnect. Features such as the bandwidth are inferred from the
+// version.
+message NVLinkInterconnect {
+
+  message NvlinkVersion {
+    enum Enum {
+      unspecified = 0;
+      nvlink_v1_0 = 1;
+      nvlink_v2_0 = 2;
+      nvlink_v3_0 = 3;
+      nvlink_v4_0 = 4;
+      nvlink_v5_0 = 5;
+    }
+  }
+  // The NVLink version.
+  // default = NvlinkVersion.Enum.nvlink_v5_0
+  optional NvlinkVersion.Enum nvlink_version = 1;
 }
 
 // Request for setting operational state of configured resources.
