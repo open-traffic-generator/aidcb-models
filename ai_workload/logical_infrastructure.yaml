@@ -227,42 +227,49 @@ components:
             Number of hosts per rack.
           x-field-uid: 2
         scale_out_switch_speed:
-          type: string
-          default: speed_800g
+          $ref: '#/components/schemas/EthernetSpeed'
           description: >-
             Ethernet speed for inter-rack communication via scale-out switches.
-            Default is speed_800g.
-            speed_100g: 100 Gigabit Ethernet.
-            speed_200g: 200 Gigabit Ethernet.
-            speed_400g: 400 Gigabit Ethernet.
-            speed_800g: 800 Gigabit Ethernet.
           x-field-uid: 3
-          x-enum:
-            speed_100g:
-              x-field-uid: 1
-            speed_200g:
-              x-field-uid: 2
-            speed_400g:
-              x-field-uid: 3
-            speed_800g:
-              x-field-uid: 4
         scale_up_switch_speed:
-          type: string
-          default: speed_800g
+          $ref: '#/components/schemas/EthernetSpeed'
           description: >-
             Ethernet speed for intra-rack communication on the scale-up network.
-            Default is speed_800g.
-            speed_100g: 100 Gigabit Ethernet.
-            speed_200g: 200 Gigabit Ethernet.
-            speed_400g: 400 Gigabit Ethernet.
-            speed_800g: 800 Gigabit Ethernet.
           x-field-uid: 4
+
+    EthernetSpeed:
+      description: >-
+        An Ethernet link speed, expressed either as a standard rate or as a
+        custom bandwidth in Gbps.
+      type: object
+      properties:
+        choice:
+          type: string
+          default: standard
+          x-field-uid: 1
           x-enum:
-            speed_100g:
+            standard:
               x-field-uid: 1
-            speed_200g:
+            custom:
               x-field-uid: 2
-            speed_400g:
+        standard:
+          description: >-
+            A standard Ethernet speed.
+          type: string
+          default: speed_800gbps
+          x-field-uid: 2
+          x-enum:
+            speed_100gbps:
+              x-field-uid: 1
+            speed_200gbps:
+              x-field-uid: 2
+            speed_400gbps:
               x-field-uid: 3
-            speed_800g:
+            speed_800gbps:
               x-field-uid: 4
+        custom:
+          description: >-
+            A custom Ethernet speed, in Gbps.
+          type: integer
+          minimum: 0
+          x-field-uid: 3
