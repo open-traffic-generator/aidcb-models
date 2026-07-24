@@ -27,7 +27,7 @@ components:
       type: object
       properties:
         host:
-          $ref: '#/components/schemas/InfrastructureHost'
+          $ref: '#/components/schemas/InfrastructureHosts'
           description: >-
             Host configuration for the infrastructure.
           x-field-uid: 1
@@ -37,9 +37,25 @@ components:
             Fabric topology for the infrastructure.
           x-field-uid: 2
 
-    InfrastructureHost:
+    InfrastructureHosts:
       description: >-
         High-level host specification for the infrastructure.
+      type: object
+      properties:
+        choice:
+          type: string
+          default: uniform
+          x-field-uid: 1
+          x-enum:
+            uniform:
+              x-field-uid: 1
+        uniform:
+          $ref: '#/components/schemas/InfrastructureUniformHostCollection'
+          x-field-uid: 2
+
+    InfrastructureUniformHostCollection:
+      description: >-
+        Host specification consisting of a set of N hosts fashioned after a template.
       type: object
       properties:
         count:
@@ -50,10 +66,21 @@ components:
           description: >-
             Number of hosts in the fabric.
           x-field-uid: 1
+        template:
+          $ref: '#/components/schemas/InfrastructureHostTemplate'
+          description: >-
+            A host template that is instantiated multiple times to form the collection of hosts.
+          x-field-uid: 2
+
+    InfrastructureHostTemplate:
+      description: >-
+        High-level single host specification for the infrastructure.
+      type: object
+      properties:
         choice:
           type: string
           default: generic
-          x-field-uid: 2
+          x-field-uid: 1
           x-enum:
             generic:
               x-field-uid: 1
@@ -61,10 +88,10 @@ components:
               x-field-uid: 2
         generic:
           $ref: '#/components/schemas/GenericHost'
-          x-field-uid: 3
+          x-field-uid: 2
         rackplane:
           $ref: '#/components/schemas/RackPlaneHost'
-          x-field-uid: 4
+          x-field-uid: 3
         use_npu_interconnect:
           type: boolean
           default: false
@@ -72,7 +99,7 @@ components:
             Emulate data transfer over NPU-to-NPU links within each host.
             When true, data transfers between interconnected ranks within
             a host are emulated.
-          x-field-uid: 5
+          x-field-uid: 4
 
     GenericHost:
       description: >-
