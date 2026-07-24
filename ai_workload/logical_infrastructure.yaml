@@ -123,15 +123,11 @@ components:
           description: >-
             Number of Neural Processing Units (NPUs) in the host.
           x-field-uid: 2
-        npu_interconnect_bandwidth_gbps:
-          type: integer
-          default: 1600
-          minimum: 0
+        npu_interconnect:
+          $ref: '#/components/schemas/NPUInterconnect'
           description: >-
-            NPU interconnect bandwidth within the host in Gbps.
-            A value of 0 means no NPU-to-NPU interconnect within the host.
-            If non-zero, each NPU within the host is interconnected via a
-            generic link attached to a single generic switch.
+            NPU interconnect linking NPUs within the host. If unset, NPUs are
+            not connected.
           x-field-uid: 3
 
     RackPlaneHost:
@@ -273,3 +269,68 @@ components:
           type: integer
           minimum: 0
           x-field-uid: 3
+
+    NPUInterconnect:
+      description: >-
+        High-level NPU interconnect (e.g. NVLink) properties, most importantly
+        the bandwidth.
+      type: object
+      properties:
+        choice:
+          type: string
+          default: generic
+          x-field-uid: 1
+          x-enum:
+            generic:
+              x-field-uid: 1
+            nvlink:
+              x-status:
+                status: under-review
+              x-field-uid: 2
+        generic:
+          $ref: '#/components/schemas/GenericNPUInterconnect'
+          x-field-uid: 2
+        nvlink:
+          $ref: '#/components/schemas/NVLinkInterconnect'
+          x-field-uid: 3
+
+    GenericNPUInterconnect:
+      description: >-
+        A generic NPU interconnect with a given bandwidth. Each NPU within the
+        host is connected via a generic link attached to a single generic
+        switch.
+      type: object
+      properties:
+        bandwidth_gbps:
+          description: >-
+            The NPU interconnect bandwidth, in Gbps.
+          type: integer
+          default: 1600
+          minimum: 0
+          x-field-uid: 1
+
+    NVLinkInterconnect:
+      x-status:
+        status: under-review
+      description: >-
+        An NVLink NPU interconnect. Features such as the bandwidth are
+        inferred from the version.
+      type: object
+      properties:
+        nvlink_version:
+          description: >-
+            The NVLink version.
+          type: string
+          default: nvlink_v5_0
+          x-field-uid: 1
+          x-enum:
+            nvlink_v1_0:
+              x-field-uid: 1
+            nvlink_v2_0:
+              x-field-uid: 2
+            nvlink_v3_0:
+              x-field-uid: 3
+            nvlink_v4_0:
+              x-field-uid: 4
+            nvlink_v5_0:
+              x-field-uid: 5
