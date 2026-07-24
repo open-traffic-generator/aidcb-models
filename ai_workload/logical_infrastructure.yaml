@@ -4,6 +4,7 @@ components:
       description: >-
         Logical infrastructure describing the emulated infrastructure topology.
       type: object
+      required: [infrastructure]
       properties:
         name:
           type: string
@@ -25,6 +26,7 @@ components:
       description: >-
         Infrastructure configuration comprising hosts and the network fabric.
       type: object
+      required: [host, fabric]
       properties:
         host:
           $ref: '#/components/schemas/InfrastructureHosts'
@@ -57,6 +59,7 @@ components:
       description: >-
         Host specification consisting of a set of N hosts fashioned after a template.
       type: object
+      required: [template]
       properties:
         count:
           type: integer
